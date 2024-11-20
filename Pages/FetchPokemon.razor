@@ -1,0 +1,43 @@
+﻿@page "/fetchpokemon"
+@inject HttpClient Http
+@using System.Net.Http
+@using System.Net.Http.Headers
+
+<PageTitle>Fetch Pokemon</PageTitle>
+
+<h3>Fetch Random Pokémon</h3>
+
+<button @onclick="FetchRandomPokemon">Get Random Pokémon</button>
+
+@if (!string.IsNullOrEmpty(Pokemon))
+{
+    <p>Random Pokémon: @Pokemon</p>
+}
+
+@code {
+    private string Pokemon;
+
+    private async Task FetchRandomPokemon()
+    {
+        try
+        {
+            // Vytvoř požadavek
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:8081/pokemon/gamba/getRandomPokemon");
+            
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjM2MTczMTg3NzMwMywiaWF0IjoxNzMxODc3MzAzLCJuYmYiOjE3MzE4NzczMDMsInVzZXJfaWQiOiIwNzNmYmU5OC1jNTg1LTQ2MjItOTUyZC1kOTIxNjJjYWJmMWEifQ.UMwyMFCbgNzSkmHF1cLvHStxmaydsa5YAzxAy0FS_sLO7CYSiYaKeMzOuj-diA3NO9CXFYgMIKq2J9KiXajXecztPd67rdI7JviXGWX7AKQjOqiMiB6phYxx9DrSeVRCSMb6hKHR9OBMYwugIKKHdTkVi_RFZKM7_k8QSngBCb063WsIjhiuGa9G9qO0a4nz1FhM7OS-24ZrrxtbRN4ANtE5T7TiVzJsAvj7mCfPqGbvY8Am252ZBl5eJJ3Emj50r0J5Yhbp_0XyIgMVM530idKhCMBTCzl3hEcYk7li58gbk05fJrgoJ-VkvyAUPUjS9Wgd_wdPOQ8CLNMNrBSrWA");
+            request.Headers.Add("Host", "gamba-api.pokedex-gamba.internal");
+            //request.Headers.Add("Host", "gamba-api.pokedex-gamba.internal");
+
+            // Pošli požadavek
+            HttpResponseMessage response = await Http.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Pokemon = $"Status: {response.StatusCode}, Body: {result}";
+        }
+        catch (Exception ex)
+        {
+            Pokemon = $"Error: {ex.Message}";
+        }
+    }
+}
