@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  frontend:
+    image: nginx:1.27.2-alpine
+    volumes:
+      - ./default-server.conf:/etc/nginx/conf.d/default-server.conf:ro
+      - ./bin/Debug/net8.0/publish/wwwroot/:/usr/share/nginx/html/:ro
+    ports:
+      - "8085:80"
+    networks:
+      - pokedex-gamba-gateway-public-net
+
+networks:
+  pokedex-gamba-gateway-public-net:
+    external: true
+    name: pokedex-gamba-gateway-public-net
