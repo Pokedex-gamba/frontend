@@ -2,20 +2,65 @@
 @inject HttpClient Http
 @using System.Net.Http
 @using System.Net.Http.Headers
+@using System.Text.Json
 
 <PageTitle>Fetch Pokemon</PageTitle>
 
-<h3>Fetch Random Pokémon</h3>
+<div class="container mt-5">
+    <h3 class="text-center mb-4">Get Random Pokémon!</h3>
 
-<button @onclick="FetchRandomPokemon">Get Random Pokémon</button>
+    <div class="text-center mb-4">
+        <button @onclick="FetchRandomPokemon" class="btn btn-primary btn-lg">Get him!</button>
+    </div>
 
-@if (!string.IsNullOrEmpty(Pokemon))
-{
-    <p>Random Pokémon: @Pokemon</p>
-}
+    @if (Pokemon != null)
+    {
+        <div class="card mx-auto" style="max-width: 500px;">
+            <img src="@Pokemon.FrontDefault" class="card-img-top" alt="@Pokemon.PokemonName">
+            <div class="card-body">
+                <h5 class="card-title text-center">@Pokemon.PokemonName</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>ID:</strong> @Pokemon.Id</li>
+                    <li class="list-group-item"><strong>Base HP:</strong> @Pokemon.BaseHP</li>
+                    <li class="list-group-item"><strong>Base Attack:</strong> @Pokemon.BaseAttack</li>
+                    <li class="list-group-item"><strong>Base Defense:</strong> @Pokemon.BaseDefense</li>
+                    <li class="list-group-item"><strong>Base Speed:</strong> @Pokemon.BaseSpeed</li>
+                    <li class="list-group-item"><strong>Type:</strong> @Pokemon.Type</li>
+                    <li class="list-group-item"><strong>Total Rarity:</strong> @Pokemon.TotalRarity</li>
+                    <li class="list-group-item">
+                        <strong>Legendary:</strong> @(Pokemon.Legendary ? "Yes" : "No")
+                    </li>
+                </ul>
+            </div>
+        </div>
+    }
+
+    <footer class="text-center mt-5">
+        <p class="text-muted"><strong>Debug:</strong> @debug</p>
+    </footer>
+</div>
 
 @code {
-    private string Pokemon;
+    private string? debug;
+
+    public class PokemonData
+    {
+        public string Id { get; set; }
+        public string UserId { get; set; }
+        public string PokemonName { get; set; }
+        public DateTime Date { get; set; }
+        public int BaseHP { get; set; }
+        public int BaseAttack { get; set; }
+        public int BaseDefense { get; set; }
+        public int BaseSpeed { get; set; }
+        public string Type { get; set; }
+        public int TotalRarity { get; set; }
+        public string FrontDefault { get; set; }
+        public string FrontShiny { get; set; }
+        public bool Legendary { get; set; }
+    }
+
+    private PokemonData? Pokemon;
 
     private async Task FetchRandomPokemon()
     {
@@ -23,20 +68,33 @@
         {
             // Vytvoř požadavek
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/pokemon/gamba/getRandomPokemon");
-            
+
             // Nastav vlastní hlavičky
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjM2MTczMTg3NzMwMywiaWF0IjoxNzMxODc3MzAzLCJuYmYiOjE3MzE4NzczMDMsInVzZXJfaWQiOiIwNzNmYmU5OC1jNTg1LTQ2MjItOTUyZC1kOTIxNjJjYWJmMWEifQ.UMwyMFCbgNzSkmHF1cLvHStxmaydsa5YAzxAy0FS_sLO7CYSiYaKeMzOuj-diA3NO9CXFYgMIKq2J9KiXajXecztPd67rdI7JviXGWX7AKQjOqiMiB6phYxx9DrSeVRCSMb6hKHR9OBMYwugIKKHdTkVi_RFZKM7_k8QSngBCb063WsIjhiuGa9G9qO0a4nz1FhM7OS-24ZrrxtbRN4ANtE5T7TiVzJsAvj7mCfPqGbvY8Am252ZBl5eJJ3Emj50r0J5Yhbp_0XyIgMVM530idKhCMBTCzl3hEcYk7li58gbk05fJrgoJ-VkvyAUPUjS9Wgd_wdPOQ8CLNMNrBSrWA");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjM2MTczMTg3NzMwMywiaWF0IjoxNzMxODc3MzAzLCJuYmYiOjE3MzE4NzczMDMsInVzZXJfaWQiOiIwNzNmYmU5OC1jNTg1LTQ2MjItOTUyZC1kOTIxNjJjYWJmMWEifQ.UMwyMFCbgNzSkmHF1cLvHStxmaydsa5YAzxAy0FS_sLO7CYSiYaKeMzOuj-diA3NO9CXFYgMIKq2J9KiXajXecztPd67rdI7JviXGWX7AKQjOqiMiB6phYxx9DrSeVRCSMb6hKHR9OBMYwugIKKHdTkVi_RFZKM7_k8QSngBCb063WsIjhiuGa9G9qO0a4nz1FhM7OS-24ZrrxtbRN4ANtE5T7TiVzJsAvj7mCfPqGbvY8Am252ZBl5eJJ3Emj50r0J5Yhbp_0XyIgMVM530idKhCMBTCzl3hEcYk7li58gbk05fJrgoJ-VkvyAUPUjS9Wgd_wdPOQ8CLNMNrBSrWA");
             request.Headers.Add("X-Host", "gamba-api.pokedex-gamba.internal");
 
             // Pošli požadavek
             HttpResponseMessage response = await Http.SendAsync(request);
             string result = await response.Content.ReadAsStringAsync();
 
-            Pokemon = $"Status: {response.StatusCode}, Body: {result}";
+
+            JsonSerializerOptions options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    //DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                };
+            PokemonData pokemonData = JsonSerializer.Deserialize<PokemonData>(result, options);
+            Pokemon = pokemonData;
+
+            string firstLetter = Pokemon.PokemonName.Substring(0, 1);
+            firstLetter = firstLetter.ToString().ToUpper();
+            Pokemon.PokemonName = firstLetter + "" + Pokemon.PokemonName.Substring(1);
+
         }
         catch (Exception ex)
         {
-            Pokemon = $"Error: {ex.Message}";
+            Pokemon = null;
         }
     }
 }
