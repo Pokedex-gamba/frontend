@@ -1,0 +1,87 @@
+@page "/login"
+@using System.Net.Http.Headers
+@using System.Net.Http
+@using System.Text.Json
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@inject HttpClient Http
+@using PokedexGambaApp.Shared
+
+<h3>Login</h3>
+
+<EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="email">Email</label>
+        <InputText id="email" @bind-Value="loginModel.Email" />
+    </div>
+
+    <div>
+        <label for="password">Password</label>
+        <InputText id="password" @bind-Value="loginModel.Password" />
+    </div>
+
+    <button type="submit">Login</button>
+</EditForm>
+
+<footer class="text-center mt-5">
+    <p class="text-muted"><strong>Debug:</strong> @Debug</p>
+</footer>
+<footer class="text-center mt-5">
+    <p class="text-muted"><strong>Exception:</strong> @Exception</p>
+</footer>
+
+@code {
+    private string? Debug;
+    private string? Exception;
+    private LoginModel loginModel = new LoginModel();
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            // Vytvoření požadavku s JSON obsahem
+            var requestData = JsonContent.Create(loginModel);
+
+            // Vytvoř požadavek
+            var request = new HttpRequestMessage(HttpMethod.Post, "/auth/login")
+            {
+                Content = requestData
+            };
+
+            // Nastavení hlaviček
+            request.Headers.Add("X-Host", "auth-api.pokedex-gamba.internal");
+
+            // Poslání požadavku
+            HttpResponseMessage response = await Http.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException($"Failed to login: {response.StatusCode} {response.ReasonPhrase}");
+            }
+
+            // Deserializace tokenu
+            Token token = JsonSerializer.Deserialize<Token>(result);
+
+            Debug = token.TokenString;
+            // Zavolání JS funkce pro uložení tokenu do sessionStorage
+            await JSRuntime.InvokeVoidAsync("storage.saveToSessionStorage", "token", token.TokenString);
+
+            // Přesměrování na domovskou stránku
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Exception = ex.Message;
+        }
+    }
+
+    public class LoginModel
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+}
