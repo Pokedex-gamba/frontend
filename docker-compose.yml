@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  frontend:
+    image: ghcr.io/pokedex-gamba/frontend:latest
+    ports:
+      - "8085:80"
+    networks:
+      - pokedex-gamba-gateway-public-net
+
+networks:
+  pokedex-gamba-gateway-public-net:
+    external: true
+    name: pokedex-gamba-gateway-public-net
