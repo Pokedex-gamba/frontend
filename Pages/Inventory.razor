@@ -14,9 +14,16 @@
             @foreach (Pokemon pokemon in PokemonList)
             {
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-                    <div class="card h-100 shadow-sm border-light">
+                    <div class="card h-100">
+
+
                         <!-- Obrázek Pokémona -->
-                        <img src="@pokemon.FrontDefault" class="card-img-top" alt="@pokemon.PokemonName">
+                        <div class="wrapper">
+                            <img src="@pokemon.FrontDefault" class="card-img-top" />
+                        
+                        @* <img src="@pokemon.FrontDefault" class="character" alt="@pokemon.PokemonName"> *@
+
+
 
                         <div class="card-body p-3">
                             <h5 class="card-title text-center">@pokemon.PokemonName</h5>
@@ -51,6 +58,7 @@
                                     <span class="text-primary">@(pokemon.Legendary ? "Yes" : "No")</span>
                                 </li>
                             </ul>
+                        </div>
                         </div>
                     </div>
                 </div>

@@ -1,31 +1,45 @@
 .card {
-    border-radius: 10px; /* Zaoblení rohů karty */
-    transition: transform 0.3s ease; /* Efekt na hover */
+    border-radius: 10px;
+    /* Zaoblení rohů karty */
+    transition: transform 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Efekt na hover */
 }
 
 .card:hover {
-    transform: scale(1.05); /* Zvětšení karty při hover */
+    transform: scale(1.05);
+    /* Zvětšení karty při hover */
+    border: none;
 }
 
 .card-img-top {
-    object-fit: contain;     /* Zachová poměr stran obrázku */
-    height: auto; /* Fixní výška pro obrázek */
-    max-height: 200px;       /* Maximální výška obrázku */
+    object-fit: contain;
+    /* Zachová poměr stran obrázku */
+    height: auto;
+    /* Fixní výška pro obrázek */
+    max-height: 200px;
+    /* Maximální výška obrázku */
     width: 100%;
+    border: none;
 }
 
 .card-body {
-    padding: 1rem; /* Zvětšení vnitřního odsazení */
+    padding: 1rem;
+    /* Zvětšení vnitřního odsazení */
+    border: none;
 }
 
 .list-group-item {
-    border: none; /* Odstranění okraje mezi položkami seznamu */
+    border: none;
+    /* Odstranění okraje mezi položkami seznamu */
     padding: 0.5rem;
     font-size: 0.9rem;
 }
 
 .list-group-item .badge {
-    font-size: 1rem; /* Velikost textu v badge */
+    font-size: 1rem;
+    /* Velikost textu v badge */
     padding: 0.5rem;
 }
 
@@ -56,3 +70,66 @@
 }
 
 
+.card-img-top:hover {
+    width: 100%;
+    opacity: 0;
+    transition: all 0.5s;
+    /* position: absolute; */
+    z-index: -1;
+}
+
+.card:hover .card-img-top {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.wrapper {
+    transition: all 0.5s;
+    /* position: absolute; */
+    width: 100%;
+    z-index: 1;
+    border-radius: 10px;
+}
+
+.card:hover .wrapper {
+    transform: perspective(900px) translateY(-5%) rotateX(25deg) translateZ(0);
+    box-shadow: 2px 35px 32px -8px rgba(0, 0, 0, 0.75);
+    -webkit-box-shadow: 2px 35px 32px -8px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 2px 35px 32px -8px rgba(0, 0, 0, 0.75);
+}
+
+.wrapper::before,
+.wrapper::after {
+    width: 100%;
+    height: 80px;
+    transition: all 0.5s;
+    /* position: absolute; */
+    left: 0;
+}
+
+.wrapper::before {
+    top: 0;
+    height: 100%;
+    background-image: linear-gradient(to top,
+            transparent 46%,
+            rgba(12, 13, 19, 0.5) 68%,
+            rgba(12, 13, 19) 97%);
+}
+
+.wrapper::after {
+    bottom: 0;
+    opacity: 1;
+    background-image: linear-gradient(to bottom,
+            transparent 46%,
+            rgba(12, 13, 19, 0.5) 68%,
+            rgba(12, 13, 19) 97%);
+}
+
+.card:hover .wrapper::before,
+.wrapper::after {
+    opacity: 1;
+}
+
+.card:hover .wrapper::after {
+    height: 120px;
+}
