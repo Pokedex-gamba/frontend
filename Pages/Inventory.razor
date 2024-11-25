@@ -1,9 +1,11 @@
 ﻿@page "/inventory"
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 @using System.Net.Http
 @using System.Net.Http.Headers
 @using System.Text.Json
 @using PokedexGambaApp.Shared
+
 
 <PageTitle>Inventory</PageTitle>
 
@@ -15,50 +17,42 @@
             {
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
                     <div class="card h-100">
-
-
-                        <!-- Obrázek Pokémona -->
                         <div class="wrapper">
                             <img src="@pokemon.FrontDefault" class="card-img-top" />
-                        
-                        @* <img src="@pokemon.FrontDefault" class="character" alt="@pokemon.PokemonName"> *@
 
 
 
-                        <div class="card-body p-3">
-                            <h5 class="card-title text-center">@pokemon.PokemonName</h5>
 
-                            <!-- Výpis základních informací -->
-                            <ul class="list-group list-group-flush">
-                                <!-- HP, Attack, Defense, Speed jako čtyři hlavní atributy -->
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <strong>HP:</strong> <span class="badge bg-success">@pokemon.BaseHP</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <strong>Attack:</strong> <span class="badge bg-danger">@pokemon.BaseAttack</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <strong>Defense:</strong> <span class="badge bg-warning">@pokemon.BaseDefense</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <strong>Speed:</strong> <span class="badge bg-info">@pokemon.BaseSpeed</span>
-                                </li>
+                            <div class="card-body p-3">
+                                <h5 class="card-title text-center">@pokemon.PokemonName</h5>
 
-                                <!-- Typ Pokémona a Rarity -->
-                                <li class="list-group-item">
-                                    <strong>Type:</strong> <span class="text-uppercase text-muted">@pokemon.Type</span>
-                                </li>
-                                <li class="list-group-item">
-                                    <strong>Rarity:</strong> <span class="badge bg-secondary">@pokemon.TotalRarity</span>
-                                </li>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>HP:</strong> <span class="badge bg-success">@pokemon.BaseHP</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Attack:</strong> <span class="badge bg-danger">@pokemon.BaseAttack</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Defense:</strong> <span class="badge bg-warning">@pokemon.BaseDefense</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Speed:</strong> <span class="badge bg-info">@pokemon.BaseSpeed</span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Type:</strong> <span class="text-uppercase text-muted">@pokemon.Type</span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Rarity:</strong> <span
+                                            class="badge bg-secondary">@pokemon.TotalRarity</span>
+                                    </li>
 
-                                <!-- Legendary status -->
-                                <li class="list-group-item">
-                                    <strong>Legendary:</strong>
-                                    <span class="text-primary">@(pokemon.Legendary ? "Yes" : "No")</span>
-                                </li>
-                            </ul>
-                        </div>
+                                    <li class="list-group-item">
+                                        <strong>Legendary:</strong>
+                                        <span class="text-primary">@(pokemon.Legendary ? "Yes" : "No")</span>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -91,9 +85,11 @@
             // Vytvoř požadavek
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/pokemon/inventory/getInventory");
 
+            // Zavolání JS funkce pro uložení tokenu do sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
             // Nastav vlastní hlavičky
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjM2MTczMTg3NzMwMywiaWF0IjoxNzMxODc3MzAzLCJuYmYiOjE3MzE4NzczMDMsInVzZXJfaWQiOiIwNzNmYmU5OC1jNTg1LTQ2MjItOTUyZC1kOTIxNjJjYWJmMWEifQ.UMwyMFCbgNzSkmHF1cLvHStxmaydsa5YAzxAy0FS_sLO7CYSiYaKeMzOuj-diA3NO9CXFYgMIKq2J9KiXajXecztPd67rdI7JviXGWX7AKQjOqiMiB6phYxx9DrSeVRCSMb6hKHR9OBMYwugIKKHdTkVi_RFZKM7_k8QSngBCb063WsIjhiuGa9G9qO0a4nz1FhM7OS-24ZrrxtbRN4ANtE5T7TiVzJsAvj7mCfPqGbvY8Am252ZBl5eJJ3Emj50r0J5Yhbp_0XyIgMVM530idKhCMBTCzl3hEcYk7li58gbk05fJrgoJ-VkvyAUPUjS9Wgd_wdPOQ8CLNMNrBSrWA");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             request.Headers.Add("X-Host", "inventory-api.pokedex-gamba.internal");
 
             // Pošli požadavek
@@ -103,8 +99,7 @@
 
             PokemonList = JsonSerializer.Deserialize<List<Pokemon>>(result);
 
-            Debug = PokemonList.ToString();
-            //debug = firstLetter + Pokemon.PokemonName.Substring(1);
+            Debug = token;
 
         }
         catch (Exception ex)
