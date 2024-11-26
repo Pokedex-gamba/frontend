@@ -31,6 +31,8 @@ public class Auth : ComponentBase
     // Funkce pro odhlášení (smazání tokenu)
     protected async Task LogoutCurrentUserAsync()
     {
-        await JSRuntime.InvokeAsync<string>("sessionStorage.removeItem;", "token");
+        await JSRuntime.InvokeAsync<string>("sessionStorage.removeItem", "token");
+        Navigation.NavigateTo("/");
+        Console.WriteLine("User logged out");
     }
 }
