@@ -1,17 +1,20 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using PokedexGambaApp.Shared
+@using static System.Net.WebRequestMethods
+@inherits Auth
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">PokedexGambaApp</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
     </div>
 </div>
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
+
+    <nav class="flex-column d-flex flex-column h-100">
+
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            <NavLink class="nav-link" href="Inventory" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Inventory
             </NavLink>
         </div>
         <div class="nav-item px-3">
@@ -20,19 +23,43 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="inventory">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> inventory
+            <NavLink class="nav-link" href="Leaderboards">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Leaderboards
+            </NavLink>
+        </div>
+
+        <!-- Logout button -->
+        <div class="mt-auto nav-item px-3">
+            <NavLink class="nav-link text-danger btn bi bi-box-arrow-left" @onclick="Logout">
+                &nbsp;Logout
             </NavLink>
         </div>
     </nav>
 </div>
+
 @code {
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
+    protected override async Task OnInitializedAsync()
+    {
+        // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+        string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+        if (token == null)
+        {
+            collapseNavMenu = !collapseNavMenu;
+        }
+    }
+
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task Logout()
+    {
+        await LogoutCurrentUserAsync();
     }
 }
