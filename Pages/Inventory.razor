@@ -63,18 +63,9 @@
             }
         </div>
     </div>
-
-    <footer class="text-center mt-5">
-        <p class="text-muted"><strong>Debug:</strong> @Debug</p>
-    </footer>
-    <footer class="text-center mt-5">
-        <p class="text-muted"><strong>Exception:</strong> @Exception</p>
-    </footer>
 </div>
 
 @code {
-    private string? Debug;
-    private string? Exception;
     private List<Pokemon> PokemonList = new List<Pokemon>();
     protected override async Task OnInitializedAsync()
     {
@@ -102,13 +93,10 @@
 
 
             PokemonList = JsonSerializer.Deserialize<List<Pokemon>>(result);
-
-            Debug = token;
-
         }
         catch (Exception ex)
         {
-            Exception = ex.Message;
+            Console.WriteLine(ex.Message);
         }
     }
 }
