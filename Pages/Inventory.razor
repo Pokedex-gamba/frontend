@@ -1,4 +1,7 @@
 ﻿@page "/inventory"
+
+@inherits Auth
+
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 @using System.Net.Http
@@ -76,6 +79,7 @@
     protected override async Task OnInitializedAsync()
     {
         // Tvoje logika, třeba načtení dat
+        await EnsureUserIsAuthenticatedAsync();
         await LoadPokemonsAsync();
     }
     private async Task LoadPokemonsAsync()
@@ -85,7 +89,7 @@
             // Vytvoř požadavek
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/pokemon/inventory/getInventory");
 
-            // Zavolání JS funkce pro uložení tokenu do sessionStorage
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
             string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
 
             // Nastav vlastní hlavičky
