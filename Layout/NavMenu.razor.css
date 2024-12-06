@@ -38,6 +38,11 @@
     color: currentColor; /* Použije barvu textu (zachová flexibilitu pro barvu ikony) */
 }
 
+.bi-person-circle {
+    font-size: 1.5rem;
+    color: currentColor;
+}
+
 
 
 .nav-item {

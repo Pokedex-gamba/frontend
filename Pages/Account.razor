@@ -1,0 +1,135 @@
+﻿@page "/Account"
+
+@inherits Auth
+
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@using System.Net.Http
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using PokedexGambaApp.Shared
+
+
+<PageTitle>Account</PageTitle>
+
+<div class="container mt-5">
+    <h3 class="text-center mb-4">These are all yours!</h3>
+    <div class="container">
+        <div class="row">
+
+            @foreach (Pokemon pokemon in PokemonList)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                    <div class="card h-100 @(pokemon.Legendary ? "legendary" : "")" data-tilt data-tilt-glare
+                        data-tilt-max-glare="0.25" data-tilt-perspective="1000"
+                        style="
+                        background:@(RarityColorFunctions.GetBackgroundGradient(pokemon.TotalRarity));
+                        border: 2px outset @(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity));
+                        "
+                        data-color="@(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity))"
+                        >
+                        <div class="wrapper">
+
+                            <div class="wrapper-pokemon-img">
+                                <img src="@pokemon.FrontDefault" class="card-img-top" />
+                            </div>
+                            <div class="card-body p-3">
+                                <h5 class="card-title text-center">@pokemon.PokemonName</h5>
+
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>HP:</strong> <span class="badge bg-success">@pokemon.BaseHP</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Attack:</strong> <span class="badge bg-danger">@pokemon.BaseAttack</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Defense:</strong> <span class="badge bg-warning">@pokemon.BaseDefense</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Speed:</strong> <span class="badge bg-info">@pokemon.BaseSpeed</span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Type:</strong> <span class="text-uppercase text-muted">@pokemon.Type</span>
+                                    </li>
+                                                                        <li class="list-group-item">
+                                        <strong>Legendary:</strong>
+                                        <span class="text-primary">@(pokemon.Legendary ? "Yes" : "No")</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-center align-items-center">
+                                        <strong class="me-2">Rarity:</strong>
+                                        <span class="badge rounded-pill bg-secondary">@pokemon.TotalRarity</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function initializeVanillaTilt() {
+        console.log("Initializing VanillaTilt...");
+
+        const tiltElements = document.querySelectorAll("[data-tilt]");
+
+        if (tiltElements.length > 0) {
+            VanillaTilt.init(tiltElements, {
+                max: 18,
+                scale: 1.08,
+            });
+            console.log(`VanillaTilt initialized on ${tiltElements.length} elements.`);
+        } else {
+            console.warn("No elements with data-tilt attribute found.");
+        }
+
+        document.querySelectorAll(".card").forEach(card => {
+            const glareColor = card.getAttribute("data-color");
+            const glareInner = card.querySelector(".js-tilt-glare-inner");
+
+            if (glareInner && glareColor) {
+                glareInner.style.background = glareColor;
+            }
+        });
+    }
+</script>
+
+
+
+@code {
+    private List<Pokemon> PokemonList = new List<Pokemon>();
+    protected override async Task OnInitializedAsync()
+    {
+        await EnsureUserIsAuthenticatedAsync();
+        await LoadPokemonsAsync();
+    }
+    
+    private async Task LoadPokemonsAsync()
+    {
+        try
+        {
+            // Vytvoř požadavek
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/pokemon/inventory/getInventory");
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "inventory-api.pokedex-gamba.internal");
+
+            // Pošli požadavek
+            HttpResponseMessage response = await Http.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            PokemonList = JsonSerializer.Deserialize<List<Pokemon>>(result);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
