@@ -23,10 +23,10 @@
                     <div class="card h-100 @(pokemon.Legendary ? "legendary" : "")" data-tilt data-tilt-glare
                         data-tilt-max-glare="0.25" data-tilt-perspective="1000"
                         style="
-                        background:@(GetBackgroundGradient(pokemon.TotalRarity));
-                        border: 2px outset @(GetRarityHSLA(pokemon.TotalRarity));
+                        background:@(RarityColorFunctions.GetBackgroundGradient(pokemon.TotalRarity));
+                        border: 2px outset @(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity));
                         "
-                        data-color="@(GetRarityHSLA(pokemon.TotalRarity))"
+                        data-color="@(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity))"
                         >
                         <div class="wrapper">
 
@@ -119,6 +119,7 @@
             Console.WriteLine($"Error initializing VanillaTilt: {ex.Message}");
         }
     }
+    
     private async Task LoadPokemonsAsync()
     {
         try
@@ -145,23 +146,4 @@
             Console.WriteLine(ex.Message);
         }
     }
-
-    string GetBackgroundGradient(int rarity)
-    {
-        double hue = GetRarityHue(rarity);
-        return "linear-gradient(to top, hsla(" + hue + ", 100%, 70%) 0%, hsla(" + hue + ", 100%, 100%) 12%)";
-    }
-
-    double GetRarityHue(int rarity)
-    {
-        double hue = ((double)rarity - 500) / 500 * 270 + 90.0;
-        return hue;
-    }
-
-    string GetRarityHSLA(int rarity)
-    {
-        double hue = GetRarityHue(rarity);
-        return "hsla(" + hue + ", 100%, 70%)";
-    }
-
 }
