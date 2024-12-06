@@ -1,91 +1,138 @@
 .card {
-    border-radius: 10px;
-    /* Zaoblení rohů karty */
-    transition: transform 0.3s ease;
-    border: none;
+    /* transition: transform 0.3s ease; */
+    border: 3px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* Efekt na hover */
+    /* background: transparentize(#000, 0.3); */
+    /* background: linear-gradient(to bottom, rgb(255, 0, 0) 0%, rgb(6, 185, 255) 100%);  */
+    position: relative;
+    /* Aby z-index fungoval */
+    transition: z-index 0.3s;
+
+    /* 
+    backdrop-filter: blur(20px);
+    transform: perspective(500px); */
 }
 
 .card:hover {
-    transform: scale(1.05);
-    /* Zvětšení karty při hover */
-    border: none;
+    z-index: 10;
+    /* Vyšší hodnota než ostatní */
 }
 
-.card-img-top {
-    object-fit: contain;
-    /* Zachová poměr stran obrázku */
-    height: auto;
-    /* Fixní výška pro obrázek */
-    max-height: 200px;
-    /* Maximální výška obrázku */
-    width: 100%;
-    border: none;
+/* .poke_card:hover {
+    z-index: -8;
+} */
+
+.legendary {
+    background: linear-gradient(to bottom, rgb(255, 215, 0) 0%, rgb(218, 165, 32) 100%);
+}
+
+.list-group-item {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.js-tilt-glare {
+    border-radius: 12px;
+    /* Zaoblení okrajů */
+    overflow: hidden;
+    /* Skryje přesahy */
+}
+
+.js-tilt-glare-inner {
+    filter: blur(20px);
+    /* Zjemnění efektu */
+    border-radius: inherit;
+    /* Zajistí stejné zaoblení jako obalující element */
+}
+
+/*
+.card:hover .card-img-top {
+    opacity: 1;
+} */
+
+.card[data-tilt] {
+    transform-style: preserve-3d;
+    transform: perspective(1000px);
+}
+
+/* .card-body {
+    transform: translateZ(100px);
+} */
+
+
+/* .card-img-top {
+    transform: translateZ(150px);
+    position: relative;
+    z-index: 1;
+}
+ */
+
+
+
+
+.wrapper:hover {
+    transform: translateZ(30px);
+    /* Zvednutí wrapperu */
+    position: relative;
+    /* Umožňuje použití z-index */
+    z-index: 1;
+    /* Ujisti se, že je nad ostatními */
+    transform-style: preserve-3d;
+    transform: perspective(1000px);
+    transition: transform 0.9s;
+}
+
+.wrapper-pokemon-img {
+    transform: translateZ(30px);
 }
 
 .card-body {
+    transform: translateZ(15px);
+}
+
+
+/* .card-img-top {
+    object-fit: contain;
+    height: auto;
+    max-height: 200px;
+    width: 100%;
+    border: none;
+} */
+
+/* .card-body {
     padding: 1rem;
-    /* Zvětšení vnitřního odsazení */
     border: none;
 }
 
 .list-group-item {
     border: none;
-    /* Odstranění okraje mezi položkami seznamu */
     padding: 0.5rem;
     font-size: 0.9rem;
 }
 
 .list-group-item .badge {
     font-size: 1rem;
-    /* Velikost textu v badge */
     padding: 0.5rem;
-}
+} */
 
 
-.card-title {
+/* .card-title {
     font-size: 1.2rem;
     text-align: center;
     margin-bottom: 1rem;
-}
-
-/* Responsive grid */
-@media (min-width: 576px) {
-    .col-sm-6 {
-        max-width: 50%;
-    }
-}
-
-@media (min-width: 768px) {
-    .col-md-4 {
-        max-width: 33.33%;
-    }
-}
-
-@media (min-width: 992px) {
-    .col-lg-3 {
-        max-width: 25%;
-    }
-}
+} */
 
 
-.card-img-top:hover {
+/* .card-img-top:hover {
     width: 100%;
     opacity: 0;
     transition: all 0.5s;
-    /* position: absolute; */
     z-index: -1;
 }
 
-.card:hover .card-img-top {
-    opacity: 1;
-    transform: scale(1.05);
-}
+
 
 .wrapper {
     transition: all 0.5s;
-    /* position: absolute; */
     width: 100%;
     z-index: 1;
     border-radius: 10px;
@@ -103,7 +150,6 @@
     width: 100%;
     height: 80px;
     transition: all 0.5s;
-    /* position: absolute; */
     left: 0;
 }
 
@@ -132,4 +178,4 @@
 
 .card:hover .wrapper::after {
     height: 120px;
-}
+} */
