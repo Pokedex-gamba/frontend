@@ -78,7 +78,7 @@
     /* Ujisti se, že je nad ostatními */
     transform-style: preserve-3d;
     transform: perspective(1000px);
-    transition: transform 0.9s;
+    transition: transform 0.9s ease-out;
 }
 
 .wrapper-pokemon-img {
