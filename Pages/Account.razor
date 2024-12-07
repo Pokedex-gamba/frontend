@@ -1,0 +1,175 @@
+﻿@page "/Account"
+
+@inherits Auth
+
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@using System.Net.Http
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using PokedexGambaApp.Shared
+@using System.Text
+
+
+<PageTitle>Account</PageTitle>
+
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header text-white text-center"
+            style="background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);">
+            <h3>Your Account</h3>
+        </div>
+
+
+        @if (UserInfo != null)
+        {
+
+
+            <div class="card-body">
+                @if (IsEditing)
+                {
+                    <EditForm Model="@UserInfo" OnValidSubmit="SubmitForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label><strong>Username:</strong></label>
+                                <InputText class="form-control" @bind-Value="UserInfo.Username" />
+                            </div>
+                            <div class="col-md-6">
+                                <label><strong>Email:</strong></label>
+                                <InputText class="form-control" @bind-Value="UserInfo.Email" />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label><strong>First Name</strong> (optional):</label>
+                                <InputText class="form-control" @bind-Value="UserInfo.Name" />
+                            </div>
+                            <div class="col-md-6">
+                                <label><strong>Last Name</strong> (optional):</label>
+                                <InputText class="form-control" @bind-Value="UserInfo.Surname" />
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success me-2">Apply & Submit</button>
+                            <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                        </div>
+                    </EditForm>
+                }
+                else
+                {
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Username:</strong>
+                            <p class="text-muted">@UserInfo.Username</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Email:</strong>
+                            <p class="text-muted">@UserInfo.Email</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>First Name</strong> (optional):
+                            <p class="text-muted">@UserInfo.Name</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Last Name</strong> (optional):
+                            <p class="text-muted">@UserInfo.Surname</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary me-2" @onclick="EnableEdit">Edit Account</button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+</div>
+
+
+
+
+@code {
+    private bool IsEditing = false;
+    private UserInfo? UserInfo;
+    protected override async Task OnInitializedAsync()
+    {
+        await EnsureUserIsAuthenticatedAsync();
+        await LoadUserInfoAsync();
+    }
+
+    private async Task LoadUserInfoAsync()
+    {
+        try
+        {
+            // Vytvoř požadavek
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/findUserInfo");
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "user-info-api.pokedex-gamba.internal");
+
+            // Pošli požadavek
+            HttpResponseMessage response = await Http.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            UserInfo = JsonSerializer.Deserialize<UserInfo>(result);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+    private async Task SubmitForm()
+    {
+        IsEditing = false;
+
+        try
+        {
+            var requestData = JsonContent.Create(UserInfo);
+
+            // Vytvoř požadavek
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "/addUserInfo")
+                {
+                    Content = requestData
+                };
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "user-info-api.pokedex-gamba.internal");
+
+            HttpResponseMessage response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("User info updated successfully!");
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error updating user info: {errorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating user info: {ex.Message}");
+        }
+    }
+
+    private void EnableEdit()
+    {
+        IsEditing = true;
+    }
+
+    private void CancelEdit()
+    {
+        IsEditing = false;
+    }
+}
