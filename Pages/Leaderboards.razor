@@ -1,0 +1,94 @@
+﻿@page "/Leaderboards"
+
+@inherits Auth
+
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@using System.Net.Http
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using PokedexGambaApp.Shared
+@using System.Text.Json.Serialization
+
+<PageTitle>Leaderboards</PageTitle>
+
+<div class="container mt-5">
+    <h3 class="text-center mb-4">Leaderboards</h3>
+    <div class="container">
+        <div class="row">
+            @if (LeaderboardsList.Any())
+            {
+                <table class="table table-striped text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Position</th>
+                            <th>User ID</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var leaderboard in LeaderboardsList.OrderByDescending(l => l.Score).Select((entry, index) => new { entry, index }))
+                        {
+                            <tr>
+                                <td>@(leaderboard.index + 1)</td>
+                                <td>@leaderboard.entry.Name</td>
+                                <td>@leaderboard.entry.Score</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-center text-muted">No leaderboards available at the moment.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<LeaderboardEntry> LeaderboardsList = new List<LeaderboardEntry>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await EnsureUserIsAuthenticatedAsync();
+        await LoadLeaderboardsAsync();
+    }
+
+    private async Task LoadLeaderboardsAsync()
+    {
+        try
+        {
+            // Vytvoř požadavek
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://127.0.0.1:8085/pokemon/leaderboards/getLeaderboards");
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "leaderboards-api.pokedex-gamba.internal");
+
+            // Pošli požadavek
+            HttpResponseMessage response = await Http.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            // Zpracuj JSON odpověď
+            string result = await response.Content.ReadAsStringAsync();
+            LeaderboardsList = JsonSerializer.Deserialize<List<LeaderboardEntry>>(result) ?? new List<LeaderboardEntry>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading leaderboards: {ex.Message}");
+        }
+    }
+
+    private class LeaderboardEntry
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+        
+        [JsonPropertyName("score")]
+        public int Score { get; set; }
+    }
+}
