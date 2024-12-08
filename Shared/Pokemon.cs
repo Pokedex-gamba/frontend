@@ -10,6 +10,8 @@ public class Pokemon : IJsonOnDeserialized
     public required string UserId { get; set; }
     [JsonPropertyName("pokemonName")]
     public required string PokemonName { get; set; }
+    [JsonPropertyName("date")]
+    public DateTime Date { get; set; }
     [JsonPropertyName("baseHP")]
     public required int BaseHP { get; set; }
     [JsonPropertyName("baseAttack")]
