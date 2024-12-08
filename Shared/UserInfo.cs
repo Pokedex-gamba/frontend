@@ -14,8 +14,5 @@ public class UserInfo
 
     [JsonPropertyName("surname")]
     public required string Surname { get; set; }
-
-    [JsonPropertyName("email")]
-    public required string Email { get; set; }
 }
 
