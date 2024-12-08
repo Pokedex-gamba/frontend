@@ -1,4 +1,4 @@
-﻿@page "/CatchPokemon"
+@page "/CatchPokemon"
 
 @inherits Auth
 
@@ -186,6 +186,7 @@
             string result = await response.Content.ReadAsStringAsync();
 
             PokemonList = JsonSerializer.Deserialize<List<Pokemon>>(result);
+            PokemonList = PokemonList.OrderByDescending(p => p.Date).ToList();
             InitializeVanillaTiltAsync();
         }
         catch (Exception ex)
