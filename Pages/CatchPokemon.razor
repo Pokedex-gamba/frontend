@@ -26,7 +26,7 @@
                 data-tilt-max-glare="0.25" data-tilt-perspective="1000" style="
                         background:@(RarityColorFunctions.GetBackgroundGradient(Pokemon.TotalRarity));
                         border: 2px outset @(RarityColorFunctions.GetRarityHSLA(Pokemon.TotalRarity));
-                                    " data-color="@(RarityColorFunctions.GetRarityHSLA(Pokemon.TotalRarity))">
+                                            " data-color="@(RarityColorFunctions.GetRarityHSLA(Pokemon.TotalRarity))">
                 <div class="wrapper">
 
                     <div class="wrapper-pokemon-img">
@@ -165,6 +165,11 @@
             // Pošli požadavek
             HttpResponseMessage response = await Http.SendAsync(request);
             string result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                UserBalance.BalanceInt -= 25;
+            }
 
             Pokemon = JsonSerializer.Deserialize<Pokemon>(result);
             InitializeVanillaTiltAsync();
