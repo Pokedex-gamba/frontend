@@ -15,19 +15,30 @@
 <div class="container mt-5">
     <h3 class="text-center mb-4">These are all yours!</h3>
     <div class="container">
+
+        <div class="d-flex justify-content-center mb-4">
+            <button class="btn btn-primary me-2" @onclick="() => SortPokemonList(SortType.ByRarity)">Sort by
+                Rarity</button>
+            <button class="btn btn-primary me-2" @onclick="() => SortPokemonList(SortType.ByName)">Sort by Name</button>
+            <button class="btn btn-primary me-2" @onclick="() => SortPokemonList(SortType.ByHP)">Sort by HP</button>
+            <button class="btn btn-primary me-2" @onclick="() => SortPokemonList(SortType.ByAttack)">Sort by
+                Attack</button>
+            <button class="btn btn-primary me-2" @onclick="() => SortPokemonList(SortType.ByDefense)">Sort by
+                Defense</button>
+            <button class="btn btn-primary" @onclick="() => SortPokemonList(SortType.BySpeed)">Sort by Speed</button>
+        </div>
+
+
         <div class="row">
 
             @foreach (Pokemon pokemon in PokemonList)
             {
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
                     <div class="card h-100 @(pokemon.Legendary ? "legendary" : "")" data-tilt data-tilt-glare
-                        data-tilt-max-glare="0.25" data-tilt-perspective="1000"
-                        style="
+                        data-tilt-max-glare="0.25" data-tilt-perspective="1000" style="
                         background:@(RarityColorFunctions.GetBackgroundGradient(pokemon.TotalRarity));
                         border: 2px outset @(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity));
-                        "
-                        data-color="@(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity))"
-                        >
+                                            " data-color="@(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity))">
                         <div class="wrapper">
 
                             <div class="wrapper-pokemon-img">
@@ -52,7 +63,7 @@
                                     <li class="list-group-item">
                                         <strong>Type:</strong> <span class="text-uppercase text-muted">@pokemon.Type</span>
                                     </li>
-                                                                        <li class="list-group-item">
+                                    <li class="list-group-item">
                                         <strong>Legendary:</strong>
                                         <span class="text-primary">@(pokemon.Legendary ? "Yes" : "No")</span>
                                     </li>
@@ -101,6 +112,46 @@
 
 @code {
     private List<Pokemon> PokemonList = new List<Pokemon>();
+
+    private enum SortType
+    {
+        ByRarity,
+        ByName,
+        ByHP,
+        ByAttack,
+        ByDefense,
+        BySpeed
+    }
+
+    private void SortPokemonList(SortType sortType)
+    {
+        switch (sortType)
+        {
+            case SortType.ByRarity:
+                PokemonList = PokemonList.OrderByDescending(p => p.TotalRarity).ToList();
+                break;
+            case SortType.ByName:
+                PokemonList = PokemonList.OrderBy(p => p.PokemonName).ToList();
+                break;
+            case SortType.ByHP:
+                PokemonList = PokemonList.OrderByDescending(p => p.BaseHP).ToList();
+                break;
+            case SortType.ByAttack:
+                PokemonList = PokemonList.OrderByDescending(p => p.BaseAttack).ToList();
+                break;
+            case SortType.ByDefense:
+                PokemonList = PokemonList.OrderByDescending(p => p.BaseDefense).ToList();
+                break;
+            case SortType.BySpeed:
+                PokemonList = PokemonList.OrderByDescending(p => p.BaseSpeed).ToList();
+                break;
+        }
+        StateHasChanged();
+        InitializeVanillaTiltAsync();
+    }
+
+
+
     protected override async Task OnInitializedAsync()
     {
         await EnsureUserIsAuthenticatedAsync();
