@@ -9,8 +9,22 @@
 
             protected override void OnInitialized()
             {
-                Navigation.NavigateTo("/");
+                string currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
+                if (!WhiteListedUrls.Contains(currentPath))
+                {
+                    Navigation.NavigateTo("/");
+                }
             }
+
+            private readonly List<string> WhiteListedUrls = new()
+            {
+                "",
+                "Account",
+                "CatchPokemon",
+                "Leaderboards",
+                "Inventory",
+            };
         }
     </NotFound>
 </Router>
+
