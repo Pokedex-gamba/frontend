@@ -32,7 +32,7 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label><strong>Username:</strong></label>
-                                <InputText class="form-control" @bind-Value="UserInfo.Username" />
+                                <p class="text-muted">@UserInfo.Username</p>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -142,13 +142,14 @@
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine("User info updated successfully!");
-                //Navigation.Refresh();
-                Navigation.NavigateTo("/Account");
+                Navigation.NavigateTo("/Account", forceLoad: true);
             }
             else
             {
                 string errorMessage = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"Error updating user info: {errorMessage}");
+                Navigation.NavigateTo("/Account", forceLoad: true);
+                
             }
         }
         catch (Exception ex)
