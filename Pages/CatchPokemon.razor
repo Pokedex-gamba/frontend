@@ -1,4 +1,4 @@
-@page "/CatchPokemon"
+﻿@page "/CatchPokemon"
 
 @inherits Auth
 
@@ -26,7 +26,8 @@
                 data-tilt-max-glare="0.25" data-tilt-perspective="1000" style="
                         background:@(RarityColorFunctions.GetBackgroundGradient(Pokemon.TotalRarity));
                         border: 2px outset @(RarityColorFunctions.GetRarityHSLA(Pokemon.TotalRarity));
-                                            " data-color="@(RarityColorFunctions.GetRarityHSLA(Pokemon.TotalRarity))">
+                                                    "
+                data-color="@(RarityColorFunctions.GetRarityHSLA(Pokemon.TotalRarity))">
                 <div class="wrapper">
 
                     <div class="wrapper-pokemon-img">
@@ -74,13 +75,10 @@
             {
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
                     <div class="card h-100 @(pokemon.Legendary ? "legendary" : "")" data-tilt data-tilt-glare
-                        data-tilt-max-glare="0.25" data-tilt-perspective="1000"
-                        style="
+                        data-tilt-max-glare="0.25" data-tilt-perspective="1000" style="
                         background:@(RarityColorFunctions.GetBackgroundGradient(pokemon.TotalRarity));
                         border: 2px outset @(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity));
-                        "
-                        data-color="@(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity))"
-                        >
+                                " data-color="@(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity))">
                         <div class="wrapper">
 
                             <div class="wrapper-pokemon-img">
@@ -105,7 +103,7 @@
                                     <li class="list-group-item">
                                         <strong>Type:</strong> <span class="text-uppercase text-muted">@pokemon.Type</span>
                                     </li>
-                                                                        <li class="list-group-item">
+                                    <li class="list-group-item">
                                         <strong>Legendary:</strong>
                                         <span class="text-primary">@(pokemon.Legendary ? "Yes" : "No")</span>
                                     </li>
@@ -254,12 +252,15 @@
             HttpResponseMessage response = await Http.SendAsync(request);
             string result = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
+            Pokemon = JsonSerializer.Deserialize<Pokemon>(result);
+            if (response.IsSuccessStatusCode)
             {
                 UserBalance.BalanceInt -= 25;
+                PokemonList.Insert(0, Pokemon);
+                StateHasChanged();
             }
 
-            Pokemon = JsonSerializer.Deserialize<Pokemon>(result);
+
             InitializeVanillaTiltAsync();
         }
         catch (Exception ex)
