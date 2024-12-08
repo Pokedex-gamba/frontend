@@ -1,0 +1,278 @@
+﻿@page "/Register"
+
+@inherits Auth
+
+@using System.Net.Http.Headers
+@using System.Net.Http
+@using System.Text.Json
+@using PokedexGambaApp.Shared
+@using System.ComponentModel.DataAnnotations
+@using System.Net
+@layout EmptyLayout
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@inject HttpClient Http
+
+<PageTitle>Register</PageTitle>
+
+<div class="container-fluid d-flex flex-column justify-content-center align-items-center min-vh-100 text-center"
+    style="background: linear-gradient(to right, #6a11cb, #2575fc);">
+    <div class="row w-100 h-100 d-flex justify-content-center align-items-center">
+        <div class="col-12 col-md-8 col-lg-6 p-4">
+            <h1 class="display-3 mb-4 text-white font-weight-bold">Welcome to Pokédex Gamba!</h1>
+
+            <p class="lead mb-5 slogan-text">@slogan</p>
+
+
+            <div class="mt-4 p-4 border-0 rounded-4 bg-transparent form-slide"
+                style="box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <h3 class="text-white">Register</h3>
+                <EditForm Model="@userInfoModel" OnValidSubmit="HandleRegisterSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="alert alert-danger mt-3 text-danger" role="alert" />
+
+                    @if (!string.IsNullOrEmpty(ValidationMessage))
+                    {
+                        <div class="alert alert-danger mt-3 text-danger" role="alert" style="list-style: none;">
+                            @ValidationMessage
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label for="regUsername" class="form-label text-white">Username</label>
+                        <InputText id="regUsername" class="form-control" @bind-Value="userInfoModel.Username" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="regName" class="form-label text-white">Name</label>
+                        <InputText id="regName" class="form-control" @bind-Value="userInfoModel.Name" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="regSurname" class="form-label text-white">Surname</label>
+                        <InputText id="regSurname" class="form-control" @bind-Value="userInfoModel.Surname" />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm rounded-pill">Submit</button>
+                </EditForm>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* CSS pro přechod formulářů */
+    @@keyframes slideIn {
+        0% {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-slide {
+        animation: slideIn 0.5s ease-out;
+    }
+
+    /* Styling pro moderní vzhled */
+    .container {
+        color: white;
+        padding: 0 20px;
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold;
+    }
+
+    .btn {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Styling pro formuláře */
+    .form-control {
+        border-radius: 8px;
+    }
+
+    .rounded-4 {
+        border-radius: 10px;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Tlačítka pro submit */
+    .btn-primary,
+    .btn-outline-primary {
+        font-size: 1.1rem;
+        padding: 10px;
+        font-weight: 600;
+    }
+
+    .slogan-text {
+        opacity: 1;
+        color: white;
+        animation: fadeInOut 5s ease-in-out infinite;
+        font-size: 1.5rem;
+    }
+
+    @@keyframes fadeInOut {
+        0% {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        50% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        100% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+    }
+</style>
+
+@code {
+    private string? Debug;
+    private string? Exception;
+    private bool showLoginForm = false;
+    private bool showRegisterForm = false;
+    private string? PasswordCheck;
+
+    private string? ValidationMessage;
+
+    private UserInfoModel userInfoModel = new UserInfoModel();
+
+
+    private string[] slogans = new string[]
+    {
+"Unleash your inner Pokémon collector and get ready to catch 'em all!",
+"Are you ready to be the very best, like no one ever was?",
+"Your destiny awaits inside your Pokéballs!",
+"Get lucky like a Mewtwo!",
+"Bet big, catch bigger!",
+"Spin the wheel, pray for Seel!",
+"Risk it all, catch 'em all!",
+"The greater your courage, the rarer your Pokémon!",
+    };
+
+    private string slogan = "";
+
+    private int currentSloganIndex = 0;
+    private System.Timers.Timer timer;
+
+    protected override async void OnInitialized()
+    {
+        // Nastavení počátečního sloganu
+        slogan = slogans[currentSloganIndex];
+
+        // Spustíme timer
+        timer = new System.Timers.Timer(5000);
+        timer.Elapsed += ChangeSlogan;
+        timer.Start();
+
+        await EnsureUserIsAuthenticatedAsync(true);
+    }
+
+    private void ChangeSlogan(object sender, System.Timers.ElapsedEventArgs e)
+    {
+        // Změna sloganu
+        currentSloganIndex = (currentSloganIndex + 1) % slogans.Length;
+        slogan = slogans[currentSloganIndex];
+
+        // Zajištění, že UI bude aktualizováno
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Zastavíme timer při odchodu komponenty
+        timer?.Stop();
+        timer?.Dispose();
+    }
+
+    private void ShowLoginForm()
+    {
+        ValidationMessage = "";
+        showLoginForm = true;
+        showRegisterForm = false; // Hide Register Form if Login is clicked
+    }
+
+    private void ShowRegisterForm()
+    {
+        ValidationMessage = "";
+        showRegisterForm = true;
+        showLoginForm = false; // Hide Login Form if Register is clicked
+    }
+
+    private async Task HandleRegisterSubmit()
+    {
+        ValidationMessage = null;
+
+        try
+        {
+            // Vytvoření JSON obsahu
+            var requestData = JsonContent.Create(userInfoModel);
+
+            // Vytvoř požadavek
+            var request = new HttpRequestMessage(HttpMethod.Post, "/addUserInfo")
+                {
+                    Content = requestData
+                };
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "user-info-api.pokedex-gamba.internal");
+
+            // Poslání požadavku
+            HttpResponseMessage response = await Http.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine(response.StatusCode);
+                Console.WriteLine(response);
+
+
+
+                if (response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    ValidationMessage = $"Account with this Username already exists";
+                    StateHasChanged();
+                }
+                throw new HttpRequestException($"Registration failed: {response.StatusCode} {response.ReasonPhrase}");
+            }
+
+            Navigation.NavigateTo("/inventory");
+        }
+        catch (Exception ex)
+        {
+            Exception = ex.Message;
+        }
+    }
+
+    public class UserInfoModel
+    {
+        [Required(ErrorMessage = "Username is required")]
+        public string Username { get; set; }
+        public string Name { get; set; }
+
+        public string Surname { get; set; }
+    }
+}
