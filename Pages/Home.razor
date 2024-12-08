@@ -337,7 +337,11 @@
 
             await JSRuntime.InvokeVoidAsync("storage.saveToSessionStorage", "token", token.TokenString);
 
-            Navigation.NavigateTo("/inventory");
+            if(endPoint == "register"){
+                Navigation.NavigateTo("/Register");
+            }else if(endPoint == "login"){
+                Navigation.NavigateTo("/Inventory");
+            }
         }
         catch (Exception ex)
         {
