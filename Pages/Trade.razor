@@ -8,71 +8,87 @@
 @using System.Net.Http.Headers
 @using System.Text.Json
 @using PokedexGambaApp.Shared
+@using System.Text.Json.Serialization
 
 <PageTitle>Trade</PageTitle>
 
 <div class="container mt-5">
-    <h3 class="text-center mb-4">Select a Pokémon for Trade</h3>
+    <h3 class="text-center mb-4">Choose your Pokémon to trade</h3>
 
-    @if (SelectedPokemon == null)
+    @if (!IsPokemonSelected)
     {
         <div class="row">
             @foreach (Pokemon pokemon in PokemonList)
             {
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-                    <div class="card h-100" style="cursor: pointer;"
-                         @onclick="() => SelectPokemon(pokemon)">
-                        <div class="wrapper">
-                            <div class="wrapper-pokemon-img">
-                                <img src="@pokemon.FrontDefault" class="card-img-top" />
-                            </div>
-                            <div class="card-body p-3">
-                                <h5 class="card-title text-center">@pokemon.PokemonName</h5>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <strong>HP:</strong> <span class="badge bg-success">@pokemon.BaseHP</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <strong>Attack:</strong> <span class="badge bg-danger">@pokemon.BaseAttack</span>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <strong>Defense:</strong> <span class="badge bg-warning">@pokemon.BaseDefense</span>
-                                    </li>
-                                </ul>
-                            </div>
+                    <div class="card h-100" @onclick="() => SelectPokemon(pokemon)">
+                        <img src="@pokemon.FrontDefault" class="card-img-top" />
+                        <div class="card-body text-center">
+                            <h5 class="card-title">@pokemon.PokemonName</h5>
                         </div>
                     </div>
                 </div>
             }
         </div>
     }
+    else if (!IsUserSelected)
+    {
+        <div class="container">
+            <h4 class="text-center mb-4">You selected: @SelectedPokemon.PokemonName</h4>
+            <img src="@SelectedPokemon.FrontDefault" alt="@SelectedPokemon.PokemonName" class="d-block mx-auto mb-4"
+                style="width: 150px;" />
+
+            <h5 class="text-center mb-4">Select a user to trade with:</h5>
+            <input type="text" class="form-control mb-3" placeholder="Search users..." @bind="SearchQuery"
+                @bind:event="oninput" />
+
+            <div class="row">
+                @if (FilteredUserList.Any())
+                {
+                    @foreach (var user in FilteredUserList)
+                    {
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                            <div class="card h-100" @onclick="() => SelectUser(user)">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">@user.Username</h5>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-center text-muted">No users found.</p>
+                }
+            </div>
+        </div>
+    }
     else
     {
-        <div class="alert alert-success text-center" role="alert">
-            <h4>You selected:</h4>
-            <div class="card mx-auto" style="max-width: 300px;">
-                <img src="@SelectedPokemon.FrontDefault" class="card-img-top" />
-                <div class="card-body">
-                    <h5 class="card-title text-center">@SelectedPokemon.PokemonName</h5>
-                </div>
-            </div>
+        <div class="text-center">
+            <h4>You selected Pokémon: @SelectedPokemon.PokemonName</h4>
+            <h5>Trading with: @SelectedUser.Username</h5>
+            <button class="btn btn-success mt-3" @onclick="ConfirmTrade">Confirm Trade</button>
         </div>
     }
 </div>
 
 @code {
     private List<Pokemon> PokemonList = new List<Pokemon>();
-    private Pokemon? SelectedPokemon = null;
+    private Pokemon SelectedPokemon;
+    private UserInfo SelectedUser;
+
+    private List<UserInfo> UserList = new();
+    private string SearchQuery = string.Empty;
+
+    private bool IsPokemonSelected = false;
+    private bool IsUserSelected = false;
 
     protected override async Task OnInitializedAsync()
     {
         await EnsureUserIsAuthenticatedAsync();
         await LoadPokemonsAsync();
-    }
-
-    private void SelectPokemon(Pokemon pokemon)
-    {
-        SelectedPokemon = pokemon;
+        await LoadUsersAsync();
     }
 
     private async Task LoadPokemonsAsync()
@@ -82,6 +98,7 @@
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/pokemon/inventory/getInventory");
 
             string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             request.Headers.Add("X-Host", "inventory-api.pokedex-gamba.internal");
 
@@ -92,7 +109,130 @@
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Error loading Pokémon: {ex.Message}");
+        }
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        try
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://127.0.0.1:8085/findAllUserInfo");
+
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "user-info-api.pokedex-gamba.internal");
+
+            HttpResponseMessage response = await Http.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            string result = await response.Content.ReadAsStringAsync();
+            UserList = JsonSerializer.Deserialize<List<UserInfo>>(result) ?? new List<UserInfo>();
+            Console.WriteLine("UserList:");
+            foreach (var user in UserList)
+            {
+                Console.WriteLine(user);
+                Console.WriteLine(user.Username);
+                Console.WriteLine(user.Surname);
+                Console.WriteLine(user.Name);
+            }
+            Console.WriteLine("UserList konec");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading users: {ex.Message}");
+        }
+    }
+
+    private void SelectPokemon(Pokemon pokemon)
+    {
+        SelectedPokemon = pokemon;
+        IsPokemonSelected = true;
+    }
+
+    private void SelectUser(UserInfo user)
+    {
+        SelectedUser = user;
+        IsUserSelected = true;
+    }
+
+    private async Task ConfirmTrade()
+    {
+        Console.WriteLine($"Trading {SelectedPokemon.PokemonName} with {SelectedUser.Username}");
+        try
+        {
+            //TradeModel tradeModel = new TradeModel { pokemonId = SelectedPokemon?.Id, userId = SelectedUser?.Id };
+            // Vytvoření požadavku s JSON obsahem
+            //var requestData = JsonContent.Create(tradeModel);
+
+            // Vytvoř požadavek
+            //var request = new HttpRequestMessage(HttpMethod.Get, "/pokemon/trading/tradePokemon​")
+            // {
+            // Content = requestData
+            // };
+
+            // Sestavení URL s query parametry
+            string url = $"/pokemon/trading/tradePokemon?inventory={SelectedPokemon?.Id}&user={SelectedUser?.Id}";
+
+
+            // Vytvoření GET požadavku
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "trading-api.pokedex-gamba.internal");
+
+
+            // Poslání požadavku
+            HttpResponseMessage response = await Http.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine(result);
+            if (!response.IsSuccessStatusCode)
+            {
+
+                throw new HttpRequestException($"Trade failed: {response.StatusCode} {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
             Console.WriteLine(ex.Message);
         }
+    }
+
+    private IEnumerable<UserInfo> FilteredUserList =>
+    string.IsNullOrEmpty(SearchQuery)
+    ? UserList
+    : UserList.Where(u =>
+    u.Username.Contains(SearchQuery) ||
+    u.Name.Contains(SearchQuery) ||
+    u.Surname.Contains(SearchQuery));
+
+    private class UserInfo
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = string.Empty;
+
+        [JsonPropertyName("username")]
+        public string Username { get; set; } = string.Empty;
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("surname")]
+        public string Surname { get; set; } = string.Empty;
+    }
+
+    private class TradeModel
+    {
+        [JsonPropertyName("inventory")]
+        public string pokemonId { get; set; } = string.Empty;
+
+        [JsonPropertyName("user")]
+        public string userId { get; set; } = string.Empty;
     }
 }
