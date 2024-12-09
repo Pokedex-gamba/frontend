@@ -7,16 +7,24 @@
 @using System.Net.Http
 @using System.Net.Http.Headers
 @using System.Text.Json
-@using PokedexGambaApp.Shared
 @using System.Text.Json.Serialization
+@using PokedexGambaApp.Shared
 
 <PageTitle>Users</PageTitle>
 
 <div class="container mt-5">
     <h3 class="text-center mb-4">Users</h3>
+    <input 
+        type="text" 
+        class="form-control mb-3" 
+        placeholder="Search users..." 
+        @bind="SearchQuery" 
+        @bind:event="oninput" 
+        aria-label="Search users" />
+
     <div class="container">
         <div class="row">
-            @if (UserList.Any())
+            @if (FilteredUserList.Any())
             {
                 <table class="table table-striped text-center">
                     <thead class="table-dark">
@@ -27,12 +35,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var user in UserList)
+                        @foreach (var user in FilteredUserList)
                         {
                             <tr>
                                 <td>@user.Username</td>
-                                <td>@(string.IsNullOrEmpty(user.Name) ? "-" : user.Name)</td>
-                                <td>@(string.IsNullOrEmpty(user.Surname) ? "-" : user.Surname)</td>
+                                <td>@user.Name</td>
+                                <td>@user.Surname</td>
                             </tr>
                         }
                     </tbody>
@@ -40,14 +48,15 @@
             }
             else
             {
-                <p class="text-center text-muted">No users available at the moment.</p>
+                <p class="text-center text-muted">No users found.</p>
             }
         </div>
     </div>
 </div>
 
 @code {
-    private List<UserEntry> UserList = new List<UserEntry>();
+    private List<UserInfo> UserList = new();
+    private string SearchQuery = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -59,23 +68,18 @@
     {
         try
         {
-            // Vytvoř požadavek
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://127.0.0.1:8085/findAllUserInfo");
 
-            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
             string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
 
-            // Nastav vlastní hlavičky
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             request.Headers.Add("X-Host", "user-info-api.pokedex-gamba.internal");
 
-            // Pošli požadavek
             HttpResponseMessage response = await Http.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            // Zpracuj JSON odpověď
             string result = await response.Content.ReadAsStringAsync();
-            UserList = JsonSerializer.Deserialize<List<UserEntry>>(result) ?? new List<UserEntry>();
+            UserList = JsonSerializer.Deserialize<List<UserInfo>>(result) ?? new List<UserInfo>();
         }
         catch (Exception ex)
         {
@@ -83,7 +87,16 @@
         }
     }
 
-    private class UserEntry
+    private IEnumerable<UserInfo> FilteredUserList =>
+        string.IsNullOrEmpty(SearchQuery)
+            ? UserList
+            : UserList
+            .Where(u =>
+                u.Username.Contains(SearchQuery) ||
+                u.Name.Contains(SearchQuery) ||
+                u.Surname.Contains(SearchQuery));
+
+    private class UserInfo
     {
         [JsonPropertyName("id")]
         public string Id { get; set; } = string.Empty;
