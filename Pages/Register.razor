@@ -43,11 +43,11 @@
                         <InputText id="regUsername" class="form-control" @bind-Value="userInfoModel.Username" />
                     </div>
                     <div class="mb-3">
-                        <label for="regName" class="form-label text-white">Name</label>
+                        <label for="regName" class="form-label text-white">Name (optional)</label>
                         <InputText id="regName" class="form-control" @bind-Value="userInfoModel.Name" />
                     </div>
                     <div class="mb-3">
-                        <label for="regSurname" class="form-label text-white">Surname</label>
+                        <label for="regSurname" class="form-label text-white">Surname (optional)</label>
                         <InputText id="regSurname" class="form-control" @bind-Value="userInfoModel.Surname" />
                     </div>
                     <button type="submit" class="btn btn-primary w-100 shadow-sm rounded-pill">Submit</button>
@@ -224,9 +224,19 @@
 
         try
         {
+
+            if (userInfoModel.Name == null)
+            {
+                userInfoModel.Name = "";
+            }
+            if (userInfoModel.Surname == null)
+            {
+                userInfoModel.Surname = "";
+            }
+
             // Vytvoření JSON obsahu
             var requestData = JsonContent.Create(userInfoModel);
-
+            
             // Vytvoř požadavek
             var request = new HttpRequestMessage(HttpMethod.Post, "/addUserInfo")
                 {

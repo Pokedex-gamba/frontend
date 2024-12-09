@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -38,6 +39,12 @@ public class Auth : ComponentBase
             HttpResponseMessage response = await Http.SendAsync(request);
             string result = await response.Content.ReadAsStringAsync();
 
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                Console.WriteLine("User is unauthorized, token is invalid, forcing logout and redirecting to login");
+                LogoutCurrentUserAsync();
+            }
+            else 
             if (!response.IsSuccessStatusCode)
             {
                 Navigation.NavigateTo("/Register");
