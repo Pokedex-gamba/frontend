@@ -1,0 +1,98 @@
+﻿@page "/Trade"
+
+@inherits Auth
+
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@using System.Net.Http
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using PokedexGambaApp.Shared
+
+<PageTitle>Trade</PageTitle>
+
+<div class="container mt-5">
+    <h3 class="text-center mb-4">Select a Pokémon for Trade</h3>
+
+    @if (SelectedPokemon == null)
+    {
+        <div class="row">
+            @foreach (Pokemon pokemon in PokemonList)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                    <div class="card h-100" style="cursor: pointer;"
+                         @onclick="() => SelectPokemon(pokemon)">
+                        <div class="wrapper">
+                            <div class="wrapper-pokemon-img">
+                                <img src="@pokemon.FrontDefault" class="card-img-top" />
+                            </div>
+                            <div class="card-body p-3">
+                                <h5 class="card-title text-center">@pokemon.PokemonName</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>HP:</strong> <span class="badge bg-success">@pokemon.BaseHP</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Attack:</strong> <span class="badge bg-danger">@pokemon.BaseAttack</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>Defense:</strong> <span class="badge bg-warning">@pokemon.BaseDefense</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success text-center" role="alert">
+            <h4>You selected:</h4>
+            <div class="card mx-auto" style="max-width: 300px;">
+                <img src="@SelectedPokemon.FrontDefault" class="card-img-top" />
+                <div class="card-body">
+                    <h5 class="card-title text-center">@SelectedPokemon.PokemonName</h5>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Pokemon> PokemonList = new List<Pokemon>();
+    private Pokemon? SelectedPokemon = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await EnsureUserIsAuthenticatedAsync();
+        await LoadPokemonsAsync();
+    }
+
+    private void SelectPokemon(Pokemon pokemon)
+    {
+        SelectedPokemon = pokemon;
+    }
+
+    private async Task LoadPokemonsAsync()
+    {
+        try
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/pokemon/inventory/getInventory");
+
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "inventory-api.pokedex-gamba.internal");
+
+            HttpResponseMessage response = await Http.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            PokemonList = JsonSerializer.Deserialize<List<Pokemon>>(result);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
