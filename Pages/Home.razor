@@ -192,8 +192,6 @@
 </style>
 
 @code {
-    private string? Debug;
-    private string? Exception;
     private bool showLoginForm = false;
     private bool showRegisterForm = false;
     private string? PasswordCheck;
@@ -333,8 +331,6 @@
 
             Token token = JsonSerializer.Deserialize<Token>(result);
 
-            Debug = token.TokenString;
-
             await JSRuntime.InvokeVoidAsync("storage.saveToSessionStorage", "token", token.TokenString);
 
             if(endPoint == "register"){
@@ -345,7 +341,7 @@
         }
         catch (Exception ex)
         {
-            Exception = ex.Message;
+            Console.WriteLine(ex.Message);
         }
     }
 
