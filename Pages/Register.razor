@@ -224,9 +224,19 @@
 
         try
         {
+
+            if (userInfoModel.Name == null)
+            {
+                userInfoModel.Name = "";
+            }
+            if (userInfoModel.Surname == null)
+            {
+                userInfoModel.Surname = "";
+            }
+
             // Vytvoření JSON obsahu
             var requestData = JsonContent.Create(userInfoModel);
-
+            
             // Vytvoř požadavek
             var request = new HttpRequestMessage(HttpMethod.Post, "/addUserInfo")
                 {
