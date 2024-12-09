@@ -20,26 +20,24 @@
             <h3>@UserInfo?.Username</h3>
         </div>
 
-
-        @if (UserInfo != null)
+        @if (UserInfo == null)
+        {
+            <div class="text-center mt-3">
+                <p>Sorry, user with this username does not exists...</p>
+            </div>
+        }else if ((UserInfo?.Surname != "") || (UserInfo?.Name != ""))
         {
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <strong>First Name</strong> (optional):
-                        <p class="text-muted">@UserInfo.Name</p>
+                        <strong>First Name</strong>
+                        <p class="text-muted">@UserInfo?.Name</p>
                     </div>
                     <div class="col-md-6">
-                        <strong>Last Name</strong> (optional):
-                        <p class="text-muted">@UserInfo.Surname</p>
+                        <strong>Last Name</strong>
+                        <p class="text-muted">@UserInfo?.Surname</p>
                     </div>
                 </div>
-            </div>
-        }
-        else
-        {
-            <div class="text-center mt-3">
-                <p>Loading user information...</p>
             </div>
         }
     </div>

@@ -31,17 +31,17 @@
                     <EditForm Model="@UserInfo" OnValidSubmit="SubmitForm">
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label><strong>Username:</strong></label>
+                                <label><strong>Username</strong></label>
                                 <p class="text-muted">@UserInfo.Username</p>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label><strong>First Name</strong> (optional):</label>
+                                <label><strong>First Name</strong> (optional)</label>
                                 <InputText class="form-control" @bind-Value="UserInfo.Name" />
                             </div>
                             <div class="col-md-6">
-                                <label><strong>Last Name</strong> (optional):</label>
+                                <label><strong>Last Name</strong> (optional)</label>
                                 <InputText class="form-control" @bind-Value="UserInfo.Surname" />
                             </div>
                         </div>
