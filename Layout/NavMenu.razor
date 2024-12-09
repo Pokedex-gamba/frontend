@@ -1,5 +1,11 @@
 ﻿@using PokedexGambaApp.Shared
+@using System.Net.Http
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using System.Net
 @using static System.Net.WebRequestMethods
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
 @inherits Auth
 
 <div class="top-row ps-3 navbar navbar-dark">
@@ -30,7 +36,7 @@
 
         <div class="mt-auto nav-item px-3">
             <NavLink class="nav-link btn bi bi-person-circle" href="Account" Match="NavLinkMatch.All">
-                &nbsp;Account
+                &nbsp;aaaa
             </NavLink>
         </div>
         <!-- Logout button -->
@@ -43,6 +49,7 @@
 </div>
 
 @code {
+    private UserInfo? UserInfo;
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -66,5 +73,37 @@
     private async Task Logout()
     {
         await LogoutCurrentUserAsync();
+    }
+
+    private async Task LoadUserInfoAsync()
+    {
+        try
+        {
+            // Vytvoř požadavek
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/findUserInfo");
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "user-info-api.pokedex-gamba.internal");
+
+            // Pošli požadavek
+            HttpResponseMessage response = await Http.SendAsync(request);
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                Console.WriteLine("User is unauthorized, token is invalid, forcing logout and redirecting to login");
+                await LogoutCurrentUserAsync();
+            }
+
+            string result = await response.Content.ReadAsStringAsync();
+            UserInfo = JsonSerializer.Deserialize<UserInfo>(result);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 }
