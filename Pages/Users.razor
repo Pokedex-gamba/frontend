@@ -14,12 +14,7 @@
 
 <div class="container mt-5">
     <h3 class="text-center mb-4">Users</h3>
-    <input 
-        type="text" 
-        class="form-control mb-3" 
-        placeholder="Search users..." 
-        @bind="SearchQuery" 
-        @bind:event="oninput" 
+    <input type="text" class="form-control mb-3" placeholder="Search users..." @bind="SearchQuery" @bind:event="oninput"
         aria-label="Search users" />
 
     <div class="container">
@@ -37,11 +32,11 @@
                     <tbody>
                         @foreach (var user in FilteredUserList)
                         {
-                            <tr>
-                                <td>@user.Username</td>
-                                <td>@user.Name</td>
-                                <td>@user.Surname</td>
-                            </tr>
+        <tr class="navigateToUser" style="cursor: pointer;" @onclick="(() => NavigateToUser(user.Username))">
+            <td>@user.Username</td>
+            <td>@user.Name</td>
+            <td>@user.Surname</td>
+        </tr>
                         }
                     </tbody>
                 </table>
@@ -54,7 +49,18 @@
     </div>
 </div>
 
+<style>
+    .navigateToUser:hover {
+        background-color: #7293ff;
+    }
+</style>
+
 @code {
+
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
     private List<UserInfo> UserList = new();
     private string SearchQuery = string.Empty;
 
@@ -62,6 +68,11 @@
     {
         await EnsureUserIsAuthenticatedAsync();
         await LoadUsersAsync();
+    }
+
+            private void NavigateToUser(string username)
+    {
+        NavigationManager.NavigateTo($"/User/{username}");
     }
 
     private async Task LoadUsersAsync()
@@ -88,13 +99,13 @@
     }
 
     private IEnumerable<UserInfo> FilteredUserList =>
-        string.IsNullOrEmpty(SearchQuery)
-            ? UserList
-            : UserList
-            .Where(u =>
-                u.Username.Contains(SearchQuery) ||
-                u.Name.Contains(SearchQuery) ||
-                u.Surname.Contains(SearchQuery));
+    string.IsNullOrEmpty(SearchQuery)
+    ? UserList
+    : UserList
+    .Where(u =>
+    u.Username.Contains(SearchQuery) ||
+    u.Name.Contains(SearchQuery) ||
+    u.Surname.Contains(SearchQuery));
 
     private class UserInfo
     {
