@@ -1,0 +1,107 @@
+﻿@page "/GetEnergy"
+
+@inherits Auth
+
+@inject HttpClient Http
+@using System.Net.Http
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using PokedexGambaApp.Shared
+@using System.Text.Json.Serialization
+
+<PageTitle>Get Energy</PageTitle>
+
+<div class="container mt-5">
+    <div class="energy-container">
+        <h3 class="energy-title">Your Energy</h3>
+        <h3 class="energy-balance bi bi-lightning-charge-fill">@UserBalance.BalanceInt</h3>
+
+        <div class="energy-actions">
+            <input type="number" class="form-control mb-3" @bind="Amount" placeholder="Enter amount" min="1" />
+            <button class="btn btn-primary" @onclick="ProcessPayment">Buy Energy</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private decimal Amount = 1.00m;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+    private async Task ProcessPayment()
+    {
+        try
+        {
+            var requestData = new
+            {
+                amount = Amount,
+                description = "coin++",
+                successUrl = "http://127.0.0.1:8085/GetEnergy/success",
+                cancelUrl = "http://127.0.0.1:8085/GetEnergy/cancel"
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(requestData), System.Text.Encoding.UTF8, "application/json");
+            content.Headers.Add("x-host", "payment-gateway-api.pokedex-gamba.internal");
+
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            HttpResponseMessage response = await Http.PostAsync("http://127.0.0.1:8085/createPayment", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string result = await response.Content.ReadAsStringAsync();
+                PayPalURLResponse responseUrl = JsonSerializer.Deserialize<PayPalURLResponse>(result);
+                NavigationManager.NavigateTo(responseUrl.approvalUrl, true);
+            }
+            else
+            {
+                Console.WriteLine($"Error: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+        }
+    }
+
+    private Money UserBalance = new Money();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await EnsureUserIsAuthenticatedAsync();
+        await FindUserWallet();
+    }
+    private async Task FindUserWallet()
+    {
+        try
+        {
+            // Vytvoř požadavek
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/findUserWallet");
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "money-manager-api.pokedex-gamba.internal");
+
+            // Pošli požadavek
+            HttpResponseMessage response = await Http.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            UserBalance = JsonSerializer.Deserialize<Money>(result);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    public class PayPalURLResponse
+    {
+        [JsonPropertyName("approval_url")]
+        public required string approvalUrl { get; set; }
+    }
+}
