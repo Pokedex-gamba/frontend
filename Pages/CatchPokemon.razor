@@ -11,13 +11,26 @@
 <PageTitle>Fetch Pokemon</PageTitle>
 
 <div class="container mt-5">
-    <h3 class="text-center mb-4">Your energy</h3>
-    <h3 class="text-center mb-4">@UserBalance.BalanceInt</h3>
+<div class="energy-container">
+    <h3 class="energy-title">Your Energy</h3>
+    <h3 class="energy-balance bi bi-lightning-charge-fill">@UserBalance.BalanceInt</h3>
 
-    <div class="text-center mb-4">
-        <button @onclick="FetchRandomPokemon" class="btn btn-primary btn-lg">Catch Random Pokémon!</button>
-        <h6>spend 25 energy</h6>
+    <div class="energy-actions">
+        <button class="get-energy bi bi-plus-circle-fill" @onclick="NavigateToGetEnergy" style="background-color: #d8b867; font-size: small;"> Get More!</button>
+        <button @onclick="FetchRandomPokemon">Catch Random Pokémon!</button>
+        <h6 class="energy-note">Spend 25 energy</h6>
     </div>
+</div>
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    private void NavigateToGetEnergy()
+    {
+        NavigationManager.NavigateTo("/GetEnergy");
+    }
+}
 
     @if (Pokemon != null)
     {
@@ -122,6 +135,91 @@
 
 
 </div>
+
+<style>
+    .energy-container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, rgba(5, 39, 103, 0.8) 0%, rgba(58, 6, 71, 0.8) 70%);
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        color: #fff;
+    }
+
+    .energy-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .energy-balance {
+        font-size: 2.4rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #ffda79;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .energy-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .energy-actions button {
+        padding: 10px 20px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: rgba(0, 255, 85, 0.8);
+        color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .energy-actions button:hover {
+        background-color: rgba(70, 20, 80, 0.9);
+        transform: scale(1.05);
+    }
+
+    .energy-actions button:active {
+        background-color: #ffda79;
+        transform: scale(0.98);
+    }
+
+    .get-energy {
+        padding: 8px 16px;
+        font-size: 1rem;
+        background-color: rgba(5, 39, 103, 0.8);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .get-energy:hover {
+        background-color: rgba(5, 50, 120, 0.9);
+        transform: translateY(-2px);
+    }
+
+    .get-energy:active {
+        background-color: rgba(5, 39, 103, 1);
+        transform: translateY(2px);
+    }
+
+    .energy-note {
+        font-size: 0.9rem;
+        color: #e0e0e0;
+    }
+</style>
+
 
 <script>
     function initializeVanillaTilt() {
