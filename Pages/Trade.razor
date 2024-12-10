@@ -16,7 +16,7 @@
 <div class="container mt-5">
     @if (!IsPokemonSelected)
     {
-        <h3 class="text-center mb-4">Choose your Pokémon to trade</h3>
+        <h3 class="text-center mb-4 fw-bold text-primary">Choose your Pokémon to trade</h3>
         <div class="row">
             @foreach (Pokemon pokemon in PokemonList)
             {
@@ -71,7 +71,7 @@
     else if (!IsUserSelected)
     {
         <div class="container">
-            <h4 class="text-center mb-4">You selected: @SelectedPokemon.PokemonName</h4>
+            <h4 class="text-center mb-4 fw-bold text-primary">You selected: @SelectedPokemon.PokemonName</h4>
 
             <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 mx-auto">
                 <div class="card h-100 @(SelectedPokemon.Legendary ? "legendary" : "")" data-tilt data-tilt-glare
@@ -153,7 +153,7 @@
     else if (TradeWasSuccessful)
     {
         <div class="text-center">
-            <h4>You successfuly traded Pokémon @SelectedPokemon.PokemonName with user @SelectedUser.Username</h4>
+            <h4 class="text-center mb-4 fw-bold text-primary">You successfuly traded Pokémon @SelectedPokemon.PokemonName with user @SelectedUser.Username</h4>
 
             <button class="btn btn-success mt-3" @onclick="() => RefreshPage()">Next Trade</button>
         </div>
@@ -162,7 +162,7 @@
     else
     {
         <div class="text-center">
-            <h4>You selected Pokémon: @SelectedPokemon.PokemonName</h4>
+            <h4 class="text-center mb-4 fw-bold text-primary">You selected Pokémon: @SelectedPokemon.PokemonName</h4>
 
 
             <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 mx-auto">
@@ -214,7 +214,7 @@
             </div>
 
 
-            <h5>Trading with: @SelectedUser.Username</h5>
+            <h5 class="text-center mb-4 fw-bold text-primary">Trading with: @SelectedUser.Username</h5>
             <button class="btn btn-success mt-3" @onclick="ConfirmTrade">Confirm Trade</button>
         </div>
     }

@@ -46,19 +46,46 @@
 </div>
 
 <div class="container mt-5">
-    <h3 class="text-center mb-4">@UserInfo?.Username's inventory</h3>
     <div class="container">
 
-        <div class="d-flex justify-content-center mb-4">
-            <button class="btn btn-primary me-2" @onclick="() => SortPokemonList(SortType.ByRarity)">Sort by
-                Rarity</button>
-            <button class="btn btn-primary me-2" @onclick="() => SortPokemonList(SortType.ByName)">Sort by Name</button>
-            <button class="btn btn-primary me-2" @onclick="() => SortPokemonList(SortType.ByHP)">Sort by HP</button>
-            <button class="btn btn-primary me-2" @onclick="() => SortPokemonList(SortType.ByAttack)">Sort by
-                Attack</button>
-            <button class="btn btn-primary me-2" @onclick="() => SortPokemonList(SortType.ByDefense)">Sort by
-                Defense</button>
-            <button class="btn btn-primary" @onclick="() => SortPokemonList(SortType.BySpeed)">Sort by Speed</button>
+        <h3 class="text-center mb-4 fw-bold text-primary">@UserInfo?.Username's inventory</h3>
+
+        <div class="container">
+            <div class="d-flex justify-content-center align-items-center gap-3 mb-4">
+                <span class="text-muted fs-5 d-flex align-items-center gap-1">
+                    <i class="bi bi-funnel-fill text-primary"></i> Sort by:
+                </span>
+
+                <button class="btn d-flex align-items-center gap-2 rarity-sort"
+                    @onclick="() => SortPokemonList(SortType.ByRarity)">
+                    <i class="bi bi-stars"></i> Rarity
+                </button>
+
+                <button class="btn d-flex align-items-center gap-2 name-sort"
+                    @onclick="() => SortPokemonList(SortType.ByName)">
+                    <i class="bi bi-fonts"></i> Name
+                </button>
+
+                <button class="btn d-flex align-items-center gap-2 hp-sort"
+                    @onclick="() => SortPokemonList(SortType.ByHP)">
+                    <i class="bi bi-heart-pulse"></i> HP
+                </button>
+
+                <button class="btn d-flex align-items-center gap-2 attack-sort"
+                    @onclick="() => SortPokemonList(SortType.ByAttack)">
+                    <i class="bi bi-lightning-charge"></i> Attack
+                </button>
+
+                <button class="btn d-flex align-items-center gap-2 defense-sort"
+                    @onclick="() => SortPokemonList(SortType.ByDefense)">
+                    <i class="bi bi-shield-check"></i> Defense
+                </button>
+
+                <button class="btn d-flex align-items-center gap-2 speed-sort"
+                    @onclick="() => SortPokemonList(SortType.BySpeed)">
+                    <i class="bi bi-speedometer2"></i> Speed
+                </button>
+            </div>
         </div>
 
 
@@ -113,6 +140,85 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Obecné nastavení tlačítek */
+    button {
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    /* Animace hover */
+    button:hover {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+
+    /* Barvy podle kategorií */
+    .rarity-sort {
+        background-color: #c77dff;
+        /* Fialová */
+        color: white;
+    }
+
+    .rarity-sort:hover {
+        background-color: #b368f8;
+    }
+
+    .name-sort {
+        background-color: #6c757d;
+        /* Šedá */
+        color: white;
+    }
+
+    .name-sort:hover {
+        background-color: #5a6268;
+    }
+
+    .hp-sort {
+        background-color: #198754;
+        /* Zelená */
+        color: white;
+    }
+
+    .hp-sort:hover {
+        background-color: #157347;
+    }
+
+    .attack-sort {
+        background-color: #dc3545;
+        /* Červená */
+        color: white;
+    }
+
+    .attack-sort:hover {
+        background-color: #bb2d3b;
+    }
+
+    .defense-sort {
+        background-color: #ffc107;
+        /* Žlutá */
+        color: black;
+    }
+
+    .defense-sort:hover {
+        background-color: #e0a800;
+    }
+
+    .speed-sort {
+        background-color: #0dcaf0;
+        /* Světle modrá */
+        color: white;
+    }
+
+    .speed-sort:hover {
+        background-color: #0bb5d6;
+    }
+</style>
 
 <script>
     function initializeVanillaTilt() {

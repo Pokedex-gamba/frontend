@@ -11,22 +11,22 @@
 @using System.Text.Json.Serialization
 @using System.Net
 
-<h3>Payment Status</h3>
+<h2 class="text-center mb-4 fw-bold text-primary">Payment Status</h2>
 
 @if (PaymentSuccessful.HasValue)
 {
     @if (PaymentSuccessful.Value)
     {
-        <p style="color: green; font-weight: bold;">Energy payment was successful!</p>
+        <h3 class="text-center mb-4 fw-bold" style="color: green; font-weight: bold;">Energy payment was successful!</h3>
     }
     else
     {
-        <p style="color: red; font-weight: bold;">Payment failed. Please try again.</p>
+        <h3 class="text-center mb-4 fw-bold" style="color: red; font-weight: bold;">Payment failed. Please try again.</h3>
     }
 }
 else
 {
-    <p>Processing payment, please wait...</p>
+    <h3 class="text-center mb-4 fw-bold" >Processing payment, please wait...</h3>
 }
 
 @code {

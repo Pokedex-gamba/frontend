@@ -12,19 +12,128 @@
 <PageTitle>Get Energy</PageTitle>
 
 <div class="container mt-5">
-    <div class="energy-container">
-        <h3 class="energy-title">Your Energy</h3>
-        <h3 class="energy-balance bi bi-lightning-charge-fill">@UserBalance.BalanceInt</h3>
+    <div class="card shadow-lg p-4 energy-card">
+        <div class="card-body text-center">
+            <h3 class="card-title mb-3">
+                Your Energy
+            </h3>
 
-        <div class="energy-actions">
-            <input type="number" class="form-control mb-3" @bind="Amount" placeholder="Enter amount" min="1" />
-            <button class="btn btn-primary" @onclick="ProcessPayment">Buy Energy</button>
+            <h1 class="text-warning fw-bold mb-4 bi bi-lightning-charge-fill">@UserBalance.BalanceInt</h1>
+
+            <div class="input-group justify-content-center">
+                <input type="number" class="form-control energy-input me-2" @bind="Amount" placeholder="Enter amount" min="1" />
+                <button class="btn btn-success" @onclick="ProcessPayment">
+                    <i class="bi bi-cart-plus"></i> Buy Energy
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
+
+
+<style>
+
+/* Upravené pozadí karty */
+.energy-card {
+    border-radius: 1rem;
+    border: none;
+    background: linear-gradient(135deg, rgba(5, 39, 103, 0.8) 0%, rgba(58, 6, 71, 0.8) 70%);
+    color: #fff;
+}
+
+/* Titulek a ikony */
+.card-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #ffcc00;
+}
+
+/* Částka s energií */
+h1 {
+    font-size: 3rem;
+    color: #ffcc00;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Input group pro zarovnání vstupu a tlačítka */
+.energy-input {
+    max-width: 120px; /* Užší vstup */
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.energy-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.energy-input:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+    outline: none;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+/* Tlačítko */
+.input-group .btn {
+    border-radius: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    background-color: #28a745;
+    color: #fff;
+}
+
+.input-group .btn:hover {
+    background-color: #1e7d36;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+}
+
+/* Vstupní pole (input) */
+.energy-input {
+    max-width: 120px; /* Užší vstup */
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff; /* Text zůstane bílý */
+}
+
+.energy-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Při zaostření */
+.energy-input:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff; /* Zajištění bílé barvy textu */
+    outline: none;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+/* Pro prohlížeče, které mohou text při výběru měnit */
+.energy-input:focus::-webkit-input-placeholder {
+    color: transparent; /* Placeholder se skryje při zaostření */
+}
+
+.energy-input:focus:-moz-placeholder {
+    color: transparent;
+}
+
+.energy-input:focus::-moz-placeholder {
+    color: transparent;
+}
+
+.energy-input:focus:-ms-input-placeholder {
+    color: transparent;
+}
+
+
+</style>
+
 @code {
-    private decimal Amount = 1.00m;
+    private decimal Amount = 25;
 
     [Inject]
     private NavigationManager NavigationManager { get; set; }
@@ -37,7 +146,7 @@
                 amount = Amount,
                 description = "coin++",
                 successUrl = "http://127.0.0.1:8085/GetEnergy/success",
-                cancelUrl = "http://127.0.0.1:8085/GetEnergy/cancel"
+                cancelUrl = "http://127.0.0.1:8085/GetEnergy/success?paymentId=fail&token=fail&PayerID=fail"
             };
 
             var content = new StringContent(JsonSerializer.Serialize(requestData), System.Text.Encoding.UTF8, "application/json");
