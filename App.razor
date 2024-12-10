@@ -28,6 +28,11 @@
                 return true;
             }
 
+            if (path.StartsWith("GetEnergy/"))
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -40,6 +45,7 @@
         "Inventory",
         "Users",
         "Trade",
+        "GetEnergy"
         };
         }
     </NotFound>
