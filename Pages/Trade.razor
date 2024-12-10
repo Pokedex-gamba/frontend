@@ -9,6 +9,7 @@
 @using System.Text.Json
 @using PokedexGambaApp.Shared
 @using System.Text.Json.Serialization
+@using System.Net
 
 <PageTitle>Trade</PageTitle>
 
@@ -24,7 +25,7 @@
                         data-tilt-max-glare="0.25" data-tilt-perspective="1000" style="cursor: pointer;
                         background:@(RarityColorFunctions.GetBackgroundGradient(pokemon.TotalRarity));
                         border: 2px outset @(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity));
-                                                                            "
+                                                                                                    "
                         data-color="@(RarityColorFunctions.GetRarityHSLA(pokemon.TotalRarity))"
                         @onclick="() => SelectPokemon(pokemon)">
                         <div class="wrapper">
@@ -72,55 +73,46 @@
         <div class="container">
             <h4 class="text-center mb-4">You selected: @SelectedPokemon.PokemonName</h4>
 
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3 mx-auto">
-                <div class="card h-100 @(@SelectedPokemon.Legendary ? "legendary" : "")" data-tilt data-tilt-glare
-                    data-tilt-max-glare="0.25" data-tilt-perspective="1000" style="cursor: pointer; 
-               background:@(RarityColorFunctions.GetBackgroundGradient(@SelectedPokemon.TotalRarity)); 
-               border: 2px solid @(RarityColorFunctions.GetRarityHSLA(@SelectedPokemon.TotalRarity)); 
-               font-size: 0.85rem; 
-               width: 90%; 
-               max-width: 200px; 
-               aspect-ratio: 3 / 4; 
-               margin: auto; 
-               display: flex; 
-               flex-direction: column;">
-                    <div class="wrapper"
-                        style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 mx-auto">
+                <div class="card h-100 @(SelectedPokemon.Legendary ? "legendary" : "")" data-tilt data-tilt-glare
+                    data-tilt-max-glare="0.25" data-tilt-perspective="1000" style="cursor: pointer;
+                        background:@(RarityColorFunctions.GetBackgroundGradient(SelectedPokemon.TotalRarity));
+                        border: 2px outset @(RarityColorFunctions.GetRarityHSLA(SelectedPokemon.TotalRarity));
+                                                                                        "
+                    data-color="@(RarityColorFunctions.GetRarityHSLA(SelectedPokemon.TotalRarity))"
+                    @onclick="() => UnSelectPokemon()">
+                    <div class="wrapper">
 
-                        <div class="wrapper-pokemon-img text-center"
-                            style="height: 50%; display: flex; align-items: center; justify-content: center;">
-                            <img src="@SelectedPokemon.FrontDefault" class="card-img-top"
-                                style="max-width: 80%; max-height: 100%; object-fit: contain;" />
+                        <div class="wrapper-pokemon-img">
+                            <img src="@SelectedPokemon.FrontDefault" class="card-img-top" />
                         </div>
-                        <div class="card-body p-2"
-                            style="padding-top: 0.5rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
-                            <h5 class="card-title text-center" style="font-size: 1rem; margin: 0;">
-                                @SelectedPokemon.PokemonName</h5>
+                        <div class="card-body p-3">
+                            <h5 class="card-title text-center">@SelectedPokemon.PokemonName</h5>
 
-                            <ul class="list-group list-group-flush mt-2" style="padding: 0; margin: 0;">
-                                <li class="list-group-item d-flex justify-content-between p-1">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
                                     <strong>HP:</strong> <span class="badge bg-success">@SelectedPokemon.BaseHP</span>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between p-1">
+                                <li class="list-group-item d-flex justify-content-between">
                                     <strong>Attack:</strong> <span
                                         class="badge bg-danger">@SelectedPokemon.BaseAttack</span>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between p-1">
+                                <li class="list-group-item d-flex justify-content-between">
                                     <strong>Defense:</strong> <span
                                         class="badge bg-warning">@SelectedPokemon.BaseDefense</span>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between p-1">
+                                <li class="list-group-item d-flex justify-content-between">
                                     <strong>Speed:</strong> <span class="badge bg-info">@SelectedPokemon.BaseSpeed</span>
                                 </li>
-                                <li class="list-group-item p-1">
+                                <li class="list-group-item">
                                     <strong>Type:</strong> <span
                                         class="text-uppercase text-muted">@SelectedPokemon.Type</span>
                                 </li>
-                                <li class="list-group-item p-1">
+                                <li class="list-group-item">
                                     <strong>Legendary:</strong>
                                     <span class="text-primary">@(SelectedPokemon.Legendary ? "Yes" : "No")</span>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-center align-items-center p-1">
+                                <li class="list-group-item d-flex justify-content-center align-items-center">
                                     <strong class="me-2">Rarity:</strong>
                                     <span class="badge rounded-pill bg-secondary">@SelectedPokemon.TotalRarity</span>
                                 </li>
@@ -164,61 +156,54 @@
             <h4>You successfuly traded Pokémon @SelectedPokemon.PokemonName with user @SelectedUser.Username</h4>
 
             <button class="btn btn-success mt-3" @onclick="() => RefreshPage()">Next Trade</button>
-        </div>;
+        </div>
+        ;
     }
     else
     {
         <div class="text-center">
             <h4>You selected Pokémon: @SelectedPokemon.PokemonName</h4>
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3 mx-auto">
-                <div class="card h-100 @(@SelectedPokemon.Legendary ? "legendary" : "")" data-tilt data-tilt-glare
-                    data-tilt-max-glare="0.25" data-tilt-perspective="1000" style="cursor: pointer; 
-               background:@(RarityColorFunctions.GetBackgroundGradient(@SelectedPokemon.TotalRarity)); 
-               border: 2px solid @(RarityColorFunctions.GetRarityHSLA(@SelectedPokemon.TotalRarity)); 
-               font-size: 0.85rem; 
-               width: 90%; 
-               max-width: 200px; 
-               aspect-ratio: 3 / 4; 
-               margin: auto; 
-               display: flex; 
-               flex-direction: column;">
-                    <div class="wrapper"
-                        style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
 
-                        <div class="wrapper-pokemon-img text-center"
-                            style="height: 50%; display: flex; align-items: center; justify-content: center;">
-                            <img src="@SelectedPokemon.FrontDefault" class="card-img-top"
-                                style="max-width: 80%; max-height: 100%; object-fit: contain;" />
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 mx-auto">
+                <div class="card h-100 @(SelectedPokemon.Legendary ? "legendary" : "")" data-tilt data-tilt-glare
+                    data-tilt-max-glare="0.25" data-tilt-perspective="1000" style="
+                        background:@(RarityColorFunctions.GetBackgroundGradient(SelectedPokemon.TotalRarity));
+                        border: 2px outset @(RarityColorFunctions.GetRarityHSLA(SelectedPokemon.TotalRarity));
+                                                                                        "
+                    data-color="@(RarityColorFunctions.GetRarityHSLA(SelectedPokemon.TotalRarity))">
+                    <div class="wrapper">
+
+                        <div class="wrapper-pokemon-img">
+                            <img src="@SelectedPokemon.FrontDefault" class="card-img-top" />
                         </div>
-                        <div class="card-body p-2"
-                            style="padding-top: 0.5rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
-                            <h5 class="card-title text-center" style="font-size: 1rem; margin: 0;">
-                                @SelectedPokemon.PokemonName</h5>
+                        <div class="card-body p-3">
+                            <h5 class="card-title text-center">@SelectedPokemon.PokemonName</h5>
 
-                            <ul class="list-group list-group-flush mt-2" style="padding: 0; margin: 0;">
-                                <li class="list-group-item d-flex justify-content-between p-1">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
                                     <strong>HP:</strong> <span class="badge bg-success">@SelectedPokemon.BaseHP</span>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between p-1">
+                                <li class="list-group-item d-flex justify-content-between">
                                     <strong>Attack:</strong> <span
                                         class="badge bg-danger">@SelectedPokemon.BaseAttack</span>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between p-1">
+                                <li class="list-group-item d-flex justify-content-between">
                                     <strong>Defense:</strong> <span
                                         class="badge bg-warning">@SelectedPokemon.BaseDefense</span>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between p-1">
+                                <li class="list-group-item d-flex justify-content-between">
                                     <strong>Speed:</strong> <span class="badge bg-info">@SelectedPokemon.BaseSpeed</span>
                                 </li>
-                                <li class="list-group-item p-1">
+                                <li class="list-group-item">
                                     <strong>Type:</strong> <span
                                         class="text-uppercase text-muted">@SelectedPokemon.Type</span>
                                 </li>
-                                <li class="list-group-item p-1">
+                                <li class="list-group-item">
                                     <strong>Legendary:</strong>
                                     <span class="text-primary">@(SelectedPokemon.Legendary ? "Yes" : "No")</span>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-center align-items-center p-1">
+                                <li class="list-group-item d-flex justify-content-center align-items-center">
                                     <strong class="me-2">Rarity:</strong>
                                     <span class="badge rounded-pill bg-secondary">@SelectedPokemon.TotalRarity</span>
                                 </li>
@@ -227,6 +212,8 @@
                     </div>
                 </div>
             </div>
+
+
             <h5>Trading with: @SelectedUser.Username</h5>
             <button class="btn btn-success mt-3" @onclick="ConfirmTrade">Confirm Trade</button>
         </div>
@@ -293,6 +280,7 @@
     private List<Pokemon> PokemonList = new List<Pokemon>();
     private Pokemon SelectedPokemon;
     private UserInfo SelectedUser;
+    private UserInfo? UserInfoInstance;
 
     private List<UserInfo> UserList = new();
     private string SearchQuery = string.Empty;
@@ -305,6 +293,7 @@
     {
         await EnsureUserIsAuthenticatedAsync();
         await LoadPokemonsAsync();
+        await LoadUserInfoAsync();
         await LoadUsersAsync();
     }
 
@@ -364,10 +353,10 @@
             Console.WriteLine("UserList:");
             foreach (var user in UserList)
             {
-                Console.WriteLine(user);
-                Console.WriteLine(user.Username);
-                Console.WriteLine(user.Surname);
-                Console.WriteLine(user.Name);
+                if (user.Username == UserInfoInstance?.Username)
+                {
+                    UserList.Remove(user);
+                }
             }
             Console.WriteLine("UserList konec");
         }
@@ -377,7 +366,40 @@
         }
     }
 
-    private void RefreshPage(){
+    private async Task LoadUserInfoAsync()
+    {
+        try
+        {
+            // Vytvoř požadavek
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/findUserInfo");
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "user-info-api.pokedex-gamba.internal");
+
+            // Pošli požadavek
+            HttpResponseMessage response = await Http.SendAsync(request);
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                Console.WriteLine("User is unauthorized, token is invalid, forcing logout and redirecting to login");
+                await LogoutCurrentUserAsync();
+            }
+
+            string result = await response.Content.ReadAsStringAsync();
+            UserInfoInstance = JsonSerializer.Deserialize<UserInfo>(result);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void RefreshPage()
+    {
         Navigation.NavigateTo("/Trade", forceLoad: true);
     }
 
@@ -385,6 +407,13 @@
     {
         SelectedPokemon = pokemon;
         IsPokemonSelected = true;
+        InitializeVanillaTiltAsync();
+    }
+
+    private void UnSelectPokemon()
+    {
+        SelectedPokemon = null;
+        IsPokemonSelected = false;
         InitializeVanillaTiltAsync();
     }
 
