@@ -1,1 +1,27 @@
-﻿
+﻿@using PokedexGambaApp.Shared
+@using System.Text.Json.Serialization
+
+@code {
+
+
+    private List<UserInfo> UserList = new();
+    private List<UserInfo> TradeHistoryList = new();
+
+    public class TradeHistoryModel
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = string.Empty;
+
+        [JsonPropertyName("date")]
+        public DateTime Date { get; set; }
+
+        [JsonPropertyName("userId")]
+        public string UserId { get; set; } = string.Empty;
+
+        [JsonPropertyName("newUserId")]
+        public string NewUserId { get; set; } = string.Empty;
+
+        [JsonPropertyName("inventoryId")]
+        public string InventoryId { get; set; } = string.Empty;
+    }
+}
