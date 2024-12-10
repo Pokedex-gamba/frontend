@@ -9,6 +9,7 @@
 @using System.Text.Json
 @using PokedexGambaApp.Shared
 @using System.Text.Json.Serialization
+@using System.Net
 
 <h3>Payment Status</h3>
 
@@ -83,6 +84,11 @@ else
             {
                 PaymentSuccessful = true;
             }
+            
+            else if(response.StatusCode == HttpStatusCode.BadRequest){
+                PaymentSuccessful = true;
+            }
+            
             else{
                 PaymentSuccessful = false;
             }
