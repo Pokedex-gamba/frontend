@@ -1,0 +1,96 @@
+﻿@page "/GetEnergy/success"
+
+@inherits Auth
+
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@using System.Net.Http
+@using System.Net.Http.Headers
+@using System.Text.Json
+@using PokedexGambaApp.Shared
+@using System.Text.Json.Serialization
+
+<h3>Payment Status</h3>
+
+@if (PaymentSuccessful.HasValue)
+{
+    @if (PaymentSuccessful.Value)
+    {
+        <p style="color: green; font-weight: bold;">Energy payment was successful!</p>
+    }
+    else
+    {
+        <p style="color: red; font-weight: bold;">Payment failed. Please try again.</p>
+    }
+}
+else
+{
+    <p>Processing payment, please wait...</p>
+}
+
+@code {
+    private string PaymentId { get; set; }
+    private string Token { get; set; }
+    private string PayerId { get; set; }
+    private bool? PaymentSuccessful { get; set; } = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Získání parametrů z URL
+        var uri = new Uri(NavigationManager.Uri);
+        var queryString = uri.Query.TrimStart('?');
+        var queryParams = queryString.Split('&', StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var param in queryParams)
+        {
+            var keyValue = param.Split('=', StringSplitOptions.RemoveEmptyEntries);
+            if (keyValue.Length == 2)
+            {
+                var key = keyValue[0];
+                var value = Uri.UnescapeDataString(keyValue[1]);
+
+                if (key == "paymentId") PaymentId = value;
+                if (key == "token") Token = value;
+                if (key == "PayerID") PayerId = value;
+            }
+        }
+
+        // Poslání požadavku na /executePayment
+        try
+        {
+            var requestData = JsonContent.Create(new
+            {
+                paymentId = PaymentId,
+                payerId = PayerId
+            });
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://127.0.0.1:8085/executePayment")
+                {
+                    Content = requestData
+                };
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("x-host", "payment-gateway-api.pokedex-gamba.internal");
+
+            // Pošli požadavek
+            HttpResponseMessage response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                PaymentSuccessful = true;
+            }
+            else{
+                PaymentSuccessful = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            PaymentSuccessful = false; // Nastav na false při chybě
+            Console.WriteLine($"Exception: {ex.Message}");
+        }
+    }
+}
