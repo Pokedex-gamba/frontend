@@ -2,6 +2,7 @@
 
 @inherits Auth
 
+@inject IJSRuntime JSRuntime
 @inject HttpClient Http
 @using System.Net.Http
 @using System.Net.Http.Headers
@@ -21,7 +22,8 @@
             <h1 class="text-warning fw-bold mb-4 bi bi-lightning-charge-fill">@UserBalance.BalanceInt</h1>
 
             <div class="input-group justify-content-center">
-                <input type="number" class="form-control energy-input me-2" @bind="Amount" placeholder="Enter amount" min="1" />
+                <input type="number" class="form-control energy-input me-2" @bind="Amount" placeholder="Enter amount"
+                    min="1" />
                 <button class="btn btn-success" @onclick="ProcessPayment">
                     <i class="bi bi-cart-plus"></i> Buy Energy
                 </button>
@@ -33,107 +35,112 @@
 
 
 <style>
+    /* Upravené pozadí karty */
+    .energy-card {
+        border-radius: 1rem;
+        border: none;
+        background: linear-gradient(135deg, rgba(5, 39, 103, 0.8) 0%, rgba(58, 6, 71, 0.8) 70%);
+        color: #fff;
+    }
 
-/* Upravené pozadí karty */
-.energy-card {
-    border-radius: 1rem;
-    border: none;
-    background: linear-gradient(135deg, rgba(5, 39, 103, 0.8) 0%, rgba(58, 6, 71, 0.8) 70%);
-    color: #fff;
-}
+    /* Titulek a ikony */
+    .card-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #ffcc00;
+    }
 
-/* Titulek a ikony */
-.card-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #ffcc00;
-}
+    /* Částka s energií */
+    h1 {
+        font-size: 3rem;
+        color: #ffcc00;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
 
-/* Částka s energií */
-h1 {
-    font-size: 3rem;
-    color: #ffcc00;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
+    /* Input group pro zarovnání vstupu a tlačítka */
+    .energy-input {
+        max-width: 120px;
+        /* Užší vstup */
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
 
-/* Input group pro zarovnání vstupu a tlačítka */
-.energy-input {
-    max-width: 120px; /* Užší vstup */
-    border-radius: 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
+    .energy-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
 
-.energy-input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-}
+    .energy-input:focus {
+        background-color: rgba(255, 255, 255, 0.2);
+        outline: none;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    }
 
-.energy-input:focus {
-    background-color: rgba(255, 255, 255, 0.2);
-    outline: none;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-}
+    /* Tlačítko */
+    .input-group .btn {
+        border-radius: 0.5rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        background-color: #28a745;
+        color: #fff;
+    }
 
-/* Tlačítko */
-.input-group .btn {
-    border-radius: 0.5rem;
-    font-size: 1.2rem;
-    font-weight: 600;
-    background-color: #28a745;
-    color: #fff;
-}
+    .input-group .btn:hover {
+        background-color: #1e7d36;
+        transform: scale(1.05);
+        transition: all 0.3s ease;
+    }
 
-.input-group .btn:hover {
-    background-color: #1e7d36;
-    transform: scale(1.05);
-    transition: all 0.3s ease;
-}
+    /* Vstupní pole (input) */
+    .energy-input {
+        max-width: 120px;
+        /* Užší vstup */
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        /* Text zůstane bílý */
+    }
 
-/* Vstupní pole (input) */
-.energy-input {
-    max-width: 120px; /* Užší vstup */
-    border-radius: 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #fff; /* Text zůstane bílý */
-}
+    .energy-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
 
-.energy-input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-}
+    /* Při zaostření */
+    .energy-input:focus {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        /* Zajištění bílé barvy textu */
+        outline: none;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    }
 
-/* Při zaostření */
-.energy-input:focus {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #fff; /* Zajištění bílé barvy textu */
-    outline: none;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-}
+    /* Pro prohlížeče, které mohou text při výběru měnit */
+    .energy-input:focus::-webkit-input-placeholder {
+        color: transparent;
+        /* Placeholder se skryje při zaostření */
+    }
 
-/* Pro prohlížeče, které mohou text při výběru měnit */
-.energy-input:focus::-webkit-input-placeholder {
-    color: transparent; /* Placeholder se skryje při zaostření */
-}
+    .energy-input:focus:-moz-placeholder {
+        color: transparent;
+    }
 
-.energy-input:focus:-moz-placeholder {
-    color: transparent;
-}
+    .energy-input:focus::-moz-placeholder {
+        color: transparent;
+    }
 
-.energy-input:focus::-moz-placeholder {
-    color: transparent;
-}
-
-.energy-input:focus:-ms-input-placeholder {
-    color: transparent;
-}
-
-
+    .energy-input:focus:-ms-input-placeholder {
+        color: transparent;
+    }
 </style>
 
 @code {
     private decimal Amount = 25;
+
+    private string successUrl;
+    private string cancelUrl;
 
     [Inject]
     private NavigationManager NavigationManager { get; set; }
@@ -141,12 +148,13 @@ h1 {
     {
         try
         {
+            var origin = await JSRuntime.InvokeAsync<string>("getOrigin");
             var requestData = new
             {
                 amount = Amount,
                 description = "coin++",
-                successUrl = "http://127.0.0.1:8085/GetEnergy/success",
-                cancelUrl = "http://127.0.0.1:8085/GetEnergy/success?paymentId=fail&token=fail&PayerID=fail"
+                successUrl = successUrl,
+                cancelUrl = cancelUrl
             };
 
             var content = new StringContent(JsonSerializer.Serialize(requestData), System.Text.Encoding.UTF8, "application/json");
@@ -155,7 +163,7 @@ h1 {
             string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            HttpResponseMessage response = await Http.PostAsync("http://127.0.0.1:8085/createPayment", content);
+            HttpResponseMessage response = await Http.PostAsync("/createPayment", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -179,6 +187,9 @@ h1 {
     protected override async Task OnInitializedAsync()
     {
         await EnsureUserIsAuthenticatedAsync();
+        var origin = await JSRuntime.InvokeAsync<string>("getOrigin");
+        successUrl = $"{origin}/GetEnergy/success";
+        cancelUrl = $"{origin}/GetEnergy/success?paymentId=fail&token=fail&PayerID=fail";
         await FindUserWallet();
     }
     private async Task FindUserWallet()

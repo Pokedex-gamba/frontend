@@ -338,7 +338,7 @@
     {
         try
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://127.0.0.1:8085/findAllUserInfo");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/findAllUserInfo");
 
             string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
 

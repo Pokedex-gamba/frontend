@@ -65,7 +65,7 @@ else
                 payerId = PayerId
             });
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://127.0.0.1:8085/executePayment")
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "/executePayment")
                 {
                     Content = requestData
                 };
