@@ -65,7 +65,7 @@
 
         <div class="mt-auto nav-item px-3">
             <NavLink class="nav-link btn bi bi-person-circle" href="Account" Match="NavLinkMatch.All">
-                &nbsp;@(UserInfo != null ? UserInfo.Username : "Account")
+                &nbsp;@(UserInfoInstance != null ? UserInfoInstance.Username : "Account")
             </NavLink>
         </div>
         <!-- Logout button -->
@@ -78,7 +78,7 @@
 </div>
 
 @code {
-    private UserInfo? UserInfo;
+    public UserInfo? UserInfoInstance;
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -130,7 +130,7 @@
             }
 
             string result = await response.Content.ReadAsStringAsync();
-            UserInfo = JsonSerializer.Deserialize<UserInfo>(result);
+            UserInfoInstance = JsonSerializer.Deserialize<UserInfo>(result);
         }
         catch (Exception ex)
         {
