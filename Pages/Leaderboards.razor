@@ -22,14 +22,16 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Position</th>
-                            <th>User ID</th>
+                            <th>User</th>
                             <th>Score</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var leaderboard in LeaderboardsList.OrderByDescending(l => l.Score).Select((entry, index) => new { entry, index }))
+                        @foreach (var leaderboard in LeaderboardsList.OrderByDescending(l => l.Score).Select((entry, index)
+                       => new { entry, index }))
                         {
-                            <tr>
+                            <tr class="navigateToUser" style="cursor: pointer;"
+                                @onclick="(() => NavigateToUser(leaderboard.entry.Name))">
                                 <td>@(leaderboard.index + 1)</td>
                                 <td>@leaderboard.entry.Name</td>
                                 <td>@leaderboard.entry.Score</td>
@@ -46,7 +48,16 @@
     </div>
 </div>
 
+<style>
+    .navigateToUser:hover {
+        background-color: #7293ff;
+    }
+</style>
+
 @code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
     private List<LeaderboardEntry> LeaderboardsList = new List<LeaderboardEntry>();
 
     protected override async Task OnInitializedAsync()
@@ -55,12 +66,18 @@
         await LoadLeaderboardsAsync();
     }
 
+    private void NavigateToUser(string username)
+    {
+        NavigationManager.NavigateTo($"/User/{username}");
+    }
+
     private async Task LoadLeaderboardsAsync()
     {
         try
         {
             // Vytvoř požadavek
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://127.0.0.1:8085/pokemon/leaderboards/getLeaderboards");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+            "http://127.0.0.1:8085/pokemon/leaderboards/getLeaderboards");
 
             // Zavolání JS funkce pro načtení tokenu ze sessionStorage
             string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
@@ -87,7 +104,7 @@
     {
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
-        
+
         [JsonPropertyName("score")]
         public int Score { get; set; }
     }
