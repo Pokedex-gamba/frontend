@@ -1,11 +1,174 @@
-﻿@using PokedexGambaApp.Shared
+﻿@page "/TradeHistory"
+
+@inherits Auth
+
+@inject HttpClient Http
+@using System.Net.Http
+@using System.Net.Http.Headers
+@using System.Text.Json
 @using System.Text.Json.Serialization
+@using PokedexGambaApp.Shared
+
+<h1 class="text-center mb-4 fw-bold text-primary">Trade History</h1>
+
+<div class="container mt-5">
+    @if (TradeHistoryList.Count == 0)
+    {
+        <p class="text-center">No trades available.</p>
+    }
+    else
+    {
+        <table class="table table-dark table-striped">
+            <thead>
+                <tr>
+                    <th>Trade ID</th>
+                    <th>Date</th>
+                    <th>From User</th>
+                    <th>To User</th>
+                    <th>Pokemon</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var trade in TradeHistoryList)
+                {
+                    var fromUser = UserList.FirstOrDefault(u => u.Id == trade.UserId)?.Username ?? "Unknown";
+                    var toUser = UserList.FirstOrDefault(u => u.Id == trade.NewUserId)?.Username ?? "Unknown";
+                    <tr>
+                        <td>@trade.Id</td>
+                        <td>@trade.Date.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@fromUser</td>
+                        <td>@toUser</td>
+                        <td>
+
+                            @foreach (var pokemon in PokemonList)
+                            {
+                                if (pokemon.Id == trade.InventoryId)
+                                {
+                                    Console.WriteLine(pokemon.PokemonName);
+                                    <div>
+                                        <img src="@pokemon.FrontDefault" alt="@pokemon.PokemonName" style="width:50px;height:50px;">
+                                        <span>@pokemon.PokemonName</span>
+                                    </div>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<style>
+    td img {
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+    td div {
+        display: flex;
+        align-items: center;
+    }
+</style>
+
 
 @code {
-
-
     private List<UserInfo> UserList = new();
-    private List<UserInfo> TradeHistoryList = new();
+    private List<TradeHistoryModel> TradeHistoryList = new();
+
+    private List<Pokemon> PokemonList = new List<Pokemon>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await EnsureUserIsAuthenticatedAsync();
+        await LoadUsersAsync();
+        await LoadTradeHistoryAsync();
+
+
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        try
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/findAllUserInfo");
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "user-info-api.pokedex-gamba.internal");
+
+            HttpResponseMessage response = await Http.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            string result = await response.Content.ReadAsStringAsync();
+            UserList = JsonSerializer.Deserialize<List<UserInfo>>(result) ?? new List<UserInfo>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading users: {ex.Message}");
+        }
+    }
+
+    private async Task LoadTradeHistoryAsync()
+    {
+        try
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/pokemon/trading/tradeHistory");
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "trading-api.pokedex-gamba.internal");
+
+            HttpResponseMessage response = await Http.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            string result = await response.Content.ReadAsStringAsync();
+            TradeHistoryList = JsonSerializer.Deserialize<List<TradeHistoryModel>>(result) ?? new List<TradeHistoryModel>();
+
+            // Načtení pokémonů pro každý záznam
+            foreach (var trade in TradeHistoryList)
+            {
+                await LoadPokemonsAsync(trade.NewUserId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading trade history: {ex.Message}");
+        }
+    }
+
+    private async Task LoadPokemonsAsync(string userID)
+    {
+        try
+        {
+            // Vytvoř požadavek
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+            $"/pokemon/inventory/getUserInventory?userId={userID}");
+
+            // Zavolání JS funkce pro načtení tokenu ze sessionStorage
+            string token = await JSRuntime.InvokeAsync<string>("storage.getFromSessionStorage", "token");
+
+            // Nastav vlastní hlavičky
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Add("X-Host", "inventory-api.pokedex-gamba.internal");
+
+            // Pošli požadavek
+            HttpResponseMessage response = await Http.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+            List<Pokemon> localPokemonList = new List<Pokemon>();
+            localPokemonList = JsonSerializer.Deserialize<List<Pokemon>>(result);
+            foreach (var pokemon in localPokemonList)
+            {
+                PokemonList.Add(pokemon);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
 
     public class TradeHistoryModel
     {
@@ -23,5 +186,14 @@
 
         [JsonPropertyName("inventoryId")]
         public string InventoryId { get; set; } = string.Empty;
+
+        public PokemonModel? Pokemon { get; set; }
     }
+
+    public class PokemonModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public string SpriteUrl { get; set; } = string.Empty; // URL obrázku pokémona
+    }
+
 }
